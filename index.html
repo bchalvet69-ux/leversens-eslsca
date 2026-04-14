@@ -98,12 +98,12 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,-apple-sy
   padding:42px 50px 32px;
   overflow-y:auto;
   display:flex;flex-direction:column;
-  opacity:0;transform:translateY(22px);
-  transition:opacity 0.42s cubic-bezier(.4,0,.2,1),transform 0.42s cubic-bezier(.4,0,.2,1);
+  opacity:0;
+  transition:opacity 0.32s ease;
   pointer-events:none;
 }
-.slide.active{opacity:1;transform:translateY(0);pointer-events:all}
-.slide.prev{opacity:0;transform:translateY(-22px)}
+.slide.active{opacity:1;pointer-events:all}
+.slide.prev{opacity:0;}
 .slide::-webkit-scrollbar{width:3px}
 .slide::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
@@ -244,19 +244,97 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
 
 .ac{opacity:0;transform:translateY(13px)}
-.slide.active .ac{animation:fadeUp .5s ease forwards}
-.slide.active .ac:nth-child(1){animation-delay:.12s}
-.slide.active .ac:nth-child(2){animation-delay:.22s}
-.slide.active .ac:nth-child(3){animation-delay:.32s}
-.slide.active .ac:nth-child(4){animation-delay:.42s}
-.slide.active .ac:nth-child(5){animation-delay:.52s}
-.slide.active .ac:nth-child(6){animation-delay:.58s}
+.slide.active:not(.visited) .ac{animation:fadeUp .5s ease forwards}
+.slide.active:not(.visited) .ac:nth-child(1){animation-delay:.12s}
+.slide.active:not(.visited) .ac:nth-child(2){animation-delay:.22s}
+.slide.active:not(.visited) .ac:nth-child(3){animation-delay:.32s}
+.slide.active:not(.visited) .ac:nth-child(4){animation-delay:.42s}
+.slide.active:not(.visited) .ac:nth-child(5){animation-delay:.52s}
+.slide.active:not(.visited) .ac:nth-child(6){animation-delay:.58s}
+.slide.visited .ac{opacity:1;transform:translateY(0)}
 
 /* ── hint ── */
 .hint{position:fixed;bottom:18px;right:18px;display:flex;gap:5px;z-index:200;opacity:.35}
 .hint span{width:24px;height:24px;border:1px solid rgba(255,255,255,.3);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;background:rgba(255,255,255,.04)}
 
-@media(max-width:780px){:root{--sw:0px}#sidebar{display:none}.slide{padding:22px 18px}.intro-wrap{padding:36px 22px}}
+@media(max-width:780px){
+  :root{--sw:0px}
+  #sidebar{display:none}
+  .slide{padding:20px 18px 80px}
+  .intro-wrap{padding:32px 20px}
+  .intro-ht{font-size:clamp(28px,8vw,48px)}
+  .intro-stats{gap:16px}
+  .intro-qr{display:none}
+}
+
+/* ── Mobile hamburger button ── */
+#mob-burger{
+  display:none;
+  position:fixed;top:14px;right:14px;z-index:500;
+  width:42px;height:42px;border-radius:10px;
+  background:rgba(10,22,40,0.92);
+  border:1px solid rgba(255,255,255,0.12);
+  backdrop-filter:blur(12px);
+  align-items:center;justify-content:center;
+  flex-direction:column;gap:5px;cursor:pointer;
+  box-shadow:0 4px 20px rgba(0,0,0,0.4);
+  transition:background 0.2s;
+}
+#mob-burger:hover{background:rgba(46,125,233,0.2)}
+#mob-burger span{
+  display:block;width:18px;height:2px;
+  background:#fff;border-radius:2px;
+  transition:transform 0.25s, opacity 0.25s;
+}
+#mob-burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+#mob-burger.open span:nth-child(2){opacity:0}
+#mob-burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* ── Mobile nav overlay ── */
+#mob-nav{
+  display:none;position:fixed;inset:0;z-index:490;
+  background:rgba(6,13,26,0.97);
+  backdrop-filter:blur(16px);
+  flex-direction:column;
+  padding:80px 28px 40px;
+  overflow-y:auto;
+}
+#mob-nav.open{display:flex;animation:qrFadeIn .22s ease}
+.mob-nav-title{
+  font-size:10px;font-weight:700;letter-spacing:3px;
+  color:var(--gold);text-transform:uppercase;margin-bottom:20px;
+}
+.mob-ni{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 16px;border-radius:10px;cursor:pointer;
+  border:1px solid transparent;margin-bottom:6px;
+  transition:background 0.18s, border-color 0.18s;
+}
+.mob-ni:hover,.mob-ni.active{
+  background:rgba(46,125,233,0.12);
+  border-color:rgba(46,125,233,0.25);
+}
+.mob-ni.active .mob-nl{color:#fff}
+.mob-nn{font-size:10px;font-weight:700;color:rgba(255,255,255,0.2);width:22px;flex-shrink:0}
+.mob-ico{font-size:16px;width:24px;text-align:center;flex-shrink:0}
+.mob-nl{font-size:14px;font-weight:600;color:rgba(255,255,255,0.7)}
+.mob-counter{
+  margin-top:auto;padding-top:24px;
+  font-size:10px;color:var(--gray);letter-spacing:2px;
+  text-transform:uppercase;
+}
+/* Mobile swipe hint */
+#mob-swipe-hint{
+  display:none;position:fixed;bottom:18px;left:50%;
+  transform:translateX(-50%);z-index:200;
+  font-size:9px;font-weight:700;color:rgba(255,255,255,0.2);
+  letter-spacing:2px;text-transform:uppercase;
+  pointer-events:none;
+}
+@media(max-width:780px){
+  #mob-burger{display:flex}
+  #mob-swipe-hint{display:block}
+}
 
 /* ── Logo animation ── */
 @keyframes logoBreathe{
@@ -582,7 +660,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="div" style="margin-bottom:18px"></div>
 
     <!-- Hero investor persona -->
-    <div style="display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,rgba(91,164,245,0.12),rgba(46,125,233,0.06));border:1px solid rgba(91,164,245,0.28);border-radius:14px;padding:16px 22px;margin-bottom:18px">
+    <div class="ac" style="display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,rgba(91,164,245,0.12),rgba(46,125,233,0.06));border:1px solid rgba(91,164,245,0.28);border-radius:14px;padding:16px 22px;margin-bottom:18px">
       <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;box-shadow:0 0 20px rgba(91,164,245,0.35)">👤</div>
       <div style="flex:1">
         <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px">The Wealth Preservation Seeker</div>
@@ -605,7 +683,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     </div>
 
     <!-- 4 key traits -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+    <div class="ac" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
 
       <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:16px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(91,164,245,0.45)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.09)'">
         <div style="font-size:26px">🧭</div>
@@ -633,7 +711,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     </div>
 
     <!-- Bottom: Segments + Not recommended -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="ac" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
 
       <!-- Investor segments -->
       <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px">
@@ -1166,20 +1244,39 @@ for(let i=0;i<N;i++){const p=document.createElement('div');p.className='pip'+(i=
 
 function goTo(n){
   if(n===cur)return;
+  const leaving=cur;
+  // Mark destination slide as visited so .ac don't re-animate (sauf Pricing qui doit toujours réanimer)
+  setTimeout(()=>{ if(cur!==7) slides[cur].classList.add('visited'); }, 500);
   slides[cur].classList.remove('active');
-  setTimeout(()=>animateSlide(n),60);
   slides[cur].classList.add('prev');
   const prev=cur;
   cur=(n+N)%N;
   slides[cur].classList.remove('prev');
   slides[cur].classList.add('active');
   setTimeout(()=>{slides[prev].classList.remove('prev')},500);
+  // Si on quitte la slide Pricing, reset ses .ac pour qu'ils réaniment au retour
+  if(leaving===7){
+    setTimeout(()=>{
+      slides[7].querySelectorAll('.ac').forEach(el=>{
+        el.style.animation='none';
+        void el.offsetWidth; // force reflow
+        el.style.animation='';
+        el.style.opacity='';
+        el.style.transform='';
+      });
+    }, 350);
+  }
   navItems.forEach((ni,i)=>ni.classList.toggle('active',i===cur));
   document.querySelectorAll('.pip').forEach((p,i)=>p.classList.toggle('on',i===cur));
   document.getElementById('counter').textContent=(cur+1)+' / '+N;
+  // Sync mobile nav
+  document.querySelectorAll('.mob-ni').forEach((ni,i)=>ni.classList.toggle('active',i===cur));
+  var mc=document.getElementById('mob-counter');if(mc)mc.textContent=(cur+1)+' / '+N;
   if(cur===2&&!chartInst)setTimeout(initChart,200);
   if(cur===7)setTimeout(initPricer,150);
 }
+// Mark first slide as visited on load so intro stats don't re-animate on return
+window.addEventListener('load',()=>{ setTimeout(()=>slides[0].classList.add('visited'),1200); });
 
 navItems.forEach(ni=>ni.addEventListener('click',()=>goTo(+ni.dataset.s)));
 document.addEventListener('keydown',e=>{
@@ -1849,6 +1946,33 @@ function resetPricer(){
 }
 </script>
 <script>
+// ── Mobile nav ──
+function toggleMobNav(){
+  var btn=document.getElementById('mob-burger');
+  var nav=document.getElementById('mob-nav');
+  btn.classList.toggle('open');
+  nav.classList.toggle('open');
+}
+function mobGoTo(n){
+  goTo(n);
+  document.getElementById('mob-burger').classList.remove('open');
+  document.getElementById('mob-nav').classList.remove('open');
+}
+
+// ── Swipe tactile (mobile) ──
+(function(){
+  var tx=0,ty=0;
+  document.addEventListener('touchstart',function(e){tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+  document.addEventListener('touchend',function(e){
+    var dx=e.changedTouches[0].clientX-tx;
+    var dy=e.changedTouches[0].clientY-ty;
+    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>50){
+      // Horizontal swipe — navigate
+      if(dx<0) goTo(cur+1); else goTo(cur-1);
+    }
+  },{passive:true});
+})();
+
 // ── QR Code auto-généré depuis l'URL de la page (fonctionnel une fois déployé) ──
 var _qrUrl = '';
 (function(){
@@ -1874,6 +1998,29 @@ function closeQrModal(){
   if(modal){ modal.classList.remove('open'); }
 }
 </script>
+
+<!-- ── Mobile hamburger button ── -->
+<button id="mob-burger" aria-label="Menu" onclick="toggleMobNav()">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- ── Mobile nav overlay ── -->
+<div id="mob-nav">
+  <div class="mob-nav-title">Navigation</div>
+  <div class="mob-ni active" data-s="0" onclick="mobGoTo(0)"><span class="mob-nn">01</span><span class="mob-ico">🏛️</span><span class="mob-nl">Introduction</span></div>
+  <div class="mob-ni" data-s="1" onclick="mobGoTo(1)"><span class="mob-nn">02</span><span class="mob-ico">📋</span><span class="mob-nl">Product Overview</span></div>
+  <div class="mob-ni" data-s="2" onclick="mobGoTo(2)"><span class="mob-nn">03</span><span class="mob-ico">📈</span><span class="mob-nl">Payoff Analysis</span></div>
+  <div class="mob-ni" data-s="3" onclick="mobGoTo(3)"><span class="mob-nn">04</span><span class="mob-ico">👤</span><span class="mob-nl">Target Client</span></div>
+  <div class="mob-ni" data-s="4" onclick="mobGoTo(4)"><span class="mob-nn">05</span><span class="mob-ico">🌍</span><span class="mob-nl">Why Euro Stoxx 50</span></div>
+  <div class="mob-ni" data-s="5" onclick="mobGoTo(5)"><span class="mob-nn">06</span><span class="mob-ico">💼</span><span class="mob-nl">Client Pitch</span></div>
+  <div class="mob-ni" data-s="6" onclick="mobGoTo(6)"><span class="mob-nn">07</span><span class="mob-ico">⚙️</span><span class="mob-nl">Structuring</span></div>
+  <div class="mob-ni" data-s="7" onclick="mobGoTo(7)"><span class="mob-nn">08</span><span class="mob-ico">💰</span><span class="mob-nl">Pricing</span></div>
+  <div class="mob-ni" data-s="8" onclick="mobGoTo(8)"><span class="mob-nn">09</span><span class="mob-ico">🛡️</span><span class="mob-nl">Bank Hedging</span></div>
+  <div class="mob-ni" data-s="9" onclick="mobGoTo(9)"><span class="mob-nn">10</span><span class="mob-ico">📊</span><span class="mob-nl">Summary</span></div>
+  <div class="mob-counter" id="mob-counter">1 / 10</div>
+</div>
+
+<div id="mob-swipe-hint">← swipe →</div>
 
 <!-- QR Modal overlay -->
 <div id="qr-modal" onclick="closeQrModal()">
