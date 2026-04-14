@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Twin Win — Delta1 Capital</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23060d1a'/><defs><linearGradient id='g' x1='0' y1='0' x2='32' y2='32' gradientUnits='userSpaceOnUse'><stop offset='0%25' stop-color='%235ba4f5'/><stop offset='100%25' stop-color='%23c9a84c'/></linearGradient></defs><polygon points='16,4 28,26 4,26' fill='%232e7de9' opacity='.18'/><polygon points='16,4 28,26 4,26' fill='none' stroke='url(%23g)' stroke-width='1.6' stroke-linejoin='round'/><text x='16' y='22' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='10' fill='url(%23g)'>Δ1</text></svg>">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+/* ═══════════════════════════════ ROOT ═══════════════════════════════ */
+:root {
+  --navy:    #060d1a;
+  --deep:    #0a1628;
+  --accent:  #2e7de9;
+  --accent2: #5ba4f5;
+  --gold:    #c9a84c;
+  --gold2:   #e8c97c;
+  --white:   #ffffff;
+  --gray:    #6b7e99;
+  --light:   #dce8ff;
+  --green:   #22c55e;
+  --red:     #ef4444;
+  --card:    rgba(255,255,255,0.04);
+  --border:  rgba(255,255,255,0.08);
+  --sw:      248px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--navy);color:#fff}
+
+/* ═══════════════════════════════ SIDEBAR ═══════════════════════════════ */
+#sidebar{
+  position:fixed;top:0;left:0;bottom:0;width:var(--sw);
+  background:rgba(4,9,18,0.97);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:60;
+  backdrop-filter:blur(16px);
+}
+#sidebar::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:
+    radial-gradient(rgba(46,125,233,0.04) 1px,transparent 1px);
+  background-size:22px 22px;
+}
+
+.sb-logo{
+  padding:26px 22px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:13px;position:relative;
+  flex-shrink:0;
+}
+.sb-logo svg{width:44px;height:44px;flex-shrink:0}
+.sb-name{
+  font-size:18px;font-weight:900;letter-spacing:0.3px;
+  background:linear-gradient(135deg,var(--accent2) 0%,var(--gold2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.sb-tagline{font-size:10px;color:var(--gray);letter-spacing:2.5px;text-transform:uppercase;margin-top:1px}
+
+.sb-product{
+  padding:14px 22px;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.sb-product .pname{font-size:12.5px;font-weight:700;color:#fff;margin-bottom:3px}
+.sb-product .psub{font-size:10.5px;color:var(--gray)}
+
+.sb-nav{flex:1;overflow-y:auto;padding:8px 0}
+.sb-nav::-webkit-scrollbar{width:2px}
+.sb-nav::-webkit-scrollbar-thumb{background:var(--border)}
+
+.ni{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 22px;cursor:pointer;
+  transition:background 0.2s;position:relative;
+  border-left:2px solid transparent;
+}
+.ni:hover{background:rgba(46,125,233,0.07)}
+.ni.active{background:rgba(46,125,233,0.12);border-left-color:var(--accent)}
+.ni.active .nl{color:#fff}
+.ni.active .nn{color:var(--accent)}
+.nn{font-size:10px;font-weight:700;color:rgba(255,255,255,0.18);width:18px;flex-shrink:0;font-variant-numeric:tabular-nums}
+.ni-ico{font-size:13px;width:18px;flex-shrink:0;text-align:center}
+.nl{font-size:12px;color:var(--gray);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color 0.2s}
+
+.sb-foot{
+  padding:14px 22px;border-top:1px solid var(--border);flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sb-counter{font-size:11px;color:var(--gray);font-weight:600}
+.sb-pips{display:flex;gap:3px}
+.pip{width:12px;height:3px;border-radius:2px;background:var(--border);transition:background 0.3s}
+.pip.on{background:var(--accent)}
+
+/* ═══════════════════════════════ MAIN ═══════════════════════════════ */
+#main{margin-left:var(--sw);height:100vh;overflow:hidden;position:relative}
+
+/* ═══════════════════════════════ SLIDES ═══════════════════════════════ */
+.slide{
+  position:absolute;inset:0;
+  padding:42px 50px 32px;
+  overflow-y:auto;
+  display:flex;flex-direction:column;
+  opacity:0;transform:translateY(22px);
+  transition:opacity 0.42s cubic-bezier(.4,0,.2,1),transform 0.42s cubic-bezier(.4,0,.2,1);
+  pointer-events:none;
+}
+.slide.active{opacity:1;transform:translateY(0);pointer-events:all}
+.slide.prev{opacity:0;transform:translateY(-22px)}
+.slide::-webkit-scrollbar{width:3px}
+.slide::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* ── header ── */
+.ey{font-size:10px;font-weight:700;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:7px}
+.sh{font-size:clamp(22px,2.8vw,32px);font-weight:800;color:#fff;line-height:1.1;margin-bottom:4px}
+.div{width:44px;height:3px;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:2px;margin:10px 0 18px}
+
+/* ── typography ── */
+h3{font-size:11.5px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+p{color:rgba(255,255,255,0.72);font-size:13px;line-height:1.7}
+strong{color:#fff}
+
+/* ── layout ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}
+.mb{margin-bottom:14px}
+.mt-a{margin-top:auto}
+
+/* ── cards ── */
+.c{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;transition:border-color .2s,transform .2s}
+.c:hover{border-color:rgba(46,125,233,0.25);transform:translateY(-1px)}
+.c.bl{border-left:3px solid var(--accent)}
+.c.go{border-left:3px solid var(--gold)}
+.c.gr{border-left:3px solid var(--green)}
+.c.re{border-left:3px solid var(--red)}
+.c.glow{border-color:rgba(46,125,233,0.3);background:rgba(46,125,233,0.07)}
+
+/* ── tags ── */
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+.tb{background:rgba(46,125,233,0.15);color:var(--accent2);border:1px solid rgba(46,125,233,0.3)}
+.tg{background:rgba(201,168,76,0.15);color:var(--gold2);border:1px solid rgba(201,168,76,0.3)}
+.tn{background:rgba(34,197,94,0.12);color:#4ade80;border:1px solid rgba(34,197,94,0.3)}
+.tr{background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.3)}
+
+/* ── big number ── */
+.bn{font-size:36px;font-weight:900;line-height:1;color:var(--accent)}
+.bn.go{color:var(--gold)}
+.bn.gr{color:var(--green)}
+.bn.re{color:var(--red)}
+.bn.wh{color:#fff}
+
+/* ── formula ── */
+.fm{background:rgba(46,125,233,0.07);border:1px solid rgba(46,125,233,0.2);border-radius:10px;padding:14px 18px;font-family:'Courier New',monospace;font-size:13.5px;color:var(--light);text-align:center;margin:10px 0}
+.fm .fl{font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:7px;font-family:'Segoe UI',sans-serif}
+
+/* ── table ── */
+table{width:100%;border-collapse:collapse}
+th{padding:9px 13px;text-align:left;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--gold);text-transform:uppercase;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)}
+td{padding:11px 13px;font-size:12.5px;color:rgba(255,255,255,0.8);border-bottom:1px solid rgba(255,255,255,0.04)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,0.02)}
+
+/* ── bullet list ── */
+.bl{list-style:none;display:flex;flex-direction:column;gap:8px}
+.bl li{display:flex;gap:9px;font-size:13px;color:rgba(255,255,255,0.75);line-height:1.55;align-items:flex-start}
+.bl li::before{content:'▸';color:var(--accent);flex-shrink:0;margin-top:2px;font-size:11px}
+
+/* ── progress bar ── */
+.pb{height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-top:5px}
+.pbf{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--gold));transition:width 1.2s cubic-bezier(.4,0,.2,1);width:0}
+
+/* ── flow diagram ── */
+.flow{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;padding:12px 0}
+.fb{padding:11px 14px;border:1px solid var(--border);border-radius:10px;background:var(--card);text-align:center;min-width:100px}
+.fb .fl{font-size:10px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.fb .fn{font-size:12.5px;font-weight:700}
+.farr{padding:0 8px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--accent);font-size:15px}
+.farr .fal{font-size:9px;color:var(--gray);white-space:nowrap}
+
+/* ── greek bars ── */
+.gr-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.gr-s{font-size:20px;font-weight:900;width:28px;color:var(--accent);flex-shrink:0}
+.gr-n{font-size:12.5px;font-weight:700;width:68px;flex-shrink:0}
+.gr-b{flex:1}
+.gr-v{font-size:11.5px;color:var(--gray);width:80px;text-align:right;flex-shrink:0}
+
+/* ═══════════════════════════════ SLIDE 1 – INTRO ═══════════════════════════════ */
+#s1{padding:0;overflow:hidden}
+#particles{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%}
+.intro-wrap{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;justify-content:center;padding:56px 64px}
+
+.intro-logo-row{
+  display:flex;align-items:center;gap:16px;margin-bottom:36px;
+  opacity:0;animation:fadeUp .7s .1s ease forwards;
+}
+.intro-logo-row svg{width:58px;height:58px}
+.il-name{font-size:22px;font-weight:900;background:linear-gradient(135deg,var(--accent2),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:.5px}
+.il-sub{font-size:10px;color:var(--gray);letter-spacing:3px;text-transform:uppercase;margin-top:2px}
+
+.intro-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;opacity:0;animation:fadeUp .6s .3s ease forwards}
+.intro-ht{
+  font-size:clamp(46px,6.5vw,80px);font-weight:900;line-height:.95;
+  background:linear-gradient(135deg,#fff 0%,#a8c4f8 55%,var(--gold2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:18px;
+  opacity:0;animation:fadeUp .7s .48s ease forwards;
+}
+.intro-sub{font-size:15px;color:rgba(255,255,255,.62);line-height:1.65;max-width:520px;margin-bottom:42px;opacity:0;animation:fadeUp .6s .62s ease forwards}
+.intro-stats{display:flex;gap:34px;flex-wrap:wrap;opacity:0;animation:fadeUp .6s .78s ease forwards}
+.ist label{display:block;font-size:9.5px;letter-spacing:2px;color:var(--gray);text-transform:uppercase;margin-bottom:4px}
+.ist span{font-size:14.5px;font-weight:700;color:#fff}
+
+/* background blobs for content slides */
+.blob{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0}
+.blob1{width:380px;height:380px;background:rgba(46,125,233,0.06);top:-100px;right:-80px;animation:bf1 20s ease-in-out infinite}
+.blob2{width:280px;height:280px;background:rgba(201,168,76,0.05);bottom:-60px;left:35%;animation:bf2 25s ease-in-out infinite}
+.inner{position:relative;z-index:1;display:flex;flex-direction:column;flex:1}
+
+/* ═══════════════════════════════ SLIDE 3 – PAYOFF ═══════════════════════════════ */
+.chart-wrap{position:relative;flex:1;min-height:300px;max-height:400px}
+.sc-btns{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap}
+.scb{
+  padding:6px 15px;border-radius:20px;border:1px solid var(--border);
+  background:transparent;color:rgba(255,255,255,.55);cursor:pointer;
+  font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  transition:all .2s;
+}
+.scb:hover,.scb.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.scb.on-red{background:var(--red)!important;border-color:var(--red)!important}
+.scb.on-green{background:var(--green)!important;border-color:var(--green)!important}
+
+.se-box{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:12px 16px;display:flex;align-items:flex-start;gap:14px;
+  margin-top:10px;transition:all .3s;min-height:52px;
+}
+.se-ico{font-size:22px;flex-shrink:0;line-height:1.2}
+.se-t{font-size:12.5px;font-weight:700;color:#fff;margin-bottom:3px}
+.se-d{font-size:11.5px;color:rgba(255,255,255,.62);line-height:1.55}
+
+/* ═══════════════════════════════ ANIMATIONS ═══════════════════════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes bf1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-30px,25px) scale(1.09)}66%{transform:translate(20px,-35px) scale(.92)}}
+@keyframes bf2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(25px,-18px) scale(1.07)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+.ac{opacity:0;transform:translateY(13px)}
+.slide.active .ac{animation:fadeUp .5s ease forwards}
+.slide.active .ac:nth-child(1){animation-delay:.12s}
+.slide.active .ac:nth-child(2){animation-delay:.22s}
+.slide.active .ac:nth-child(3){animation-delay:.32s}
+.slide.active .ac:nth-child(4){animation-delay:.42s}
+.slide.active .ac:nth-child(5){animation-delay:.52s}
+.slide.active .ac:nth-child(6){animation-delay:.58s}
+
+/* ── hint ── */
+.hint{position:fixed;bottom:18px;right:18px;display:flex;gap:5px;z-index:200;opacity:.35}
+.hint span{width:24px;height:24px;border:1px solid rgba(255,255,255,.3);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;background:rgba(255,255,255,.04)}
+
+@media(max-width:780px){:root{--sw:0px}#sidebar{display:none}.slide{padding:22px 18px}.intro-wrap{padding:36px 22px}}
+
+/* ── Logo animation ── */
+@keyframes logoBreathe{
+  0%,100%{filter:drop-shadow(0 0 3px rgba(91,164,245,0.25));transform:scale(1)}
+  50%{filter:drop-shadow(0 0 14px rgba(91,164,245,0.65)) drop-shadow(0 0 5px rgba(201,168,76,0.3));transform:scale(1.06)}
+}
+.sb-logo svg{animation:logoBreathe 4s ease-in-out infinite;transform-origin:center}
+.intro-logo-row svg{animation:logoBreathe 5s 0.5s ease-in-out infinite;transform-origin:center}
+
+/* ── Pricer sliders ── */
+.psr-row{margin-bottom:12px}
+.psr-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.psr-lbl{font-size:11.5px;color:rgba(255,255,255,0.75);font-weight:600}
+.psr-val{font-size:13.5px;font-weight:900;color:var(--accent);min-width:52px;text-align:right;font-variant-numeric:tabular-nums}
+.psr-hint{font-size:10px;color:var(--gray);margin-top:3px;line-height:1.4}
+.pslider{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;transition:background .1s}
+.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 0 3px rgba(46,125,233,0.22);transition:all .15s}
+.pslider::-webkit-slider-thumb:hover{background:var(--accent2);box-shadow:0 0 0 6px rgba(46,125,233,0.28);transform:scale(1.15)}
+.pslider::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--accent);cursor:pointer;border:none;box-shadow:0 0 0 3px rgba(46,125,233,0.22)}
+/* ── Waterfall ── */
+.wf-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.wf-lbl{font-size:11px;color:rgba(255,255,255,0.65);width:120px;flex-shrink:0;line-height:1.3}
+.wf-bw{flex:1;height:7px;background:rgba(255,255,255,0.07);border-radius:4px;overflow:hidden}
+.wf-bf{height:100%;border-radius:4px;transition:width .65s cubic-bezier(.4,0,.2,1);width:0}
+.wf-n{font-size:12px;font-weight:800;width:48px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums}
+/* ── Margin box ── */
+.mbox{padding:14px 18px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;transition:all .4s;margin-bottom:0}
+.mbox.ok{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.35)}
+.mbox.warn{background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.35)}
+.mbox.bad{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.35)}
+/* ── Metric tiles ── */
+.mtile{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.mt-v{font-size:20px;font-weight:900;line-height:1;margin-bottom:4px;font-variant-numeric:tabular-nums}
+.mt-l{font-size:9.5px;color:var(--gray);letter-spacing:1px;text-transform:uppercase}
+/* ═══════════════════════════════ QR CODE INTRO ═══════════════════════════════ */
+.intro-qr{
+  position:absolute;bottom:44px;right:52px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  opacity:0;animation:fadeUp .6s 1.1s ease forwards;
+  z-index:2;
+}
+.intro-qr img{
+  width:180px;height:180px;
+  background:#fff;padding:10px;
+  border-radius:14px;
+  box-shadow:0 0 0 1px rgba(255,255,255,0.10),0 8px 36px rgba(0,0,0,0.5);
+  display:block;
+  cursor:pointer;
+  transition:transform 0.2s, box-shadow 0.2s;
+}
+.intro-qr img:hover{
+  transform:scale(1.06);
+  box-shadow:0 0 0 2px rgba(91,164,245,0.4),0 12px 48px rgba(0,0,0,0.6);
+}
+.qr-label{
+  font-size:9px;font-weight:700;color:var(--gray);
+  letter-spacing:2.5px;text-transform:uppercase;
+  text-align:center;
+}
+.qr-hint{
+  font-size:8.5px;color:rgba(91,164,245,0.7);
+  letter-spacing:1.5px;text-transform:uppercase;
+  text-align:center;margin-top:-4px;
+}
+@media(max-width:780px){.intro-qr{display:none}}
+
+/* ── QR Modal ── */
+#qr-modal{
+  display:none;position:fixed;inset:0;z-index:999;
+  background:rgba(6,13,26,0.85);
+  backdrop-filter:blur(10px);
+  align-items:center;justify-content:center;
+  cursor:pointer;
+}
+#qr-modal.open{display:flex;animation:qrFadeIn .25s ease}
+@keyframes qrFadeIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+#qr-modal-inner{
+  display:flex;flex-direction:column;align-items:center;gap:18px;
+  pointer-events:none;
+}
+#qr-modal img{
+  width:340px;height:340px;
+  background:#fff;padding:16px;
+  border-radius:20px;
+  box-shadow:0 0 0 1px rgba(255,255,255,0.15),0 24px 80px rgba(0,0,0,0.7);
+}
+#qr-modal-url{
+  font-size:11px;color:rgba(255,255,255,0.45);
+  letter-spacing:1px;max-width:360px;
+  text-align:center;word-break:break-all;
+}
+#qr-modal-close{
+  font-size:9px;font-weight:700;color:rgba(255,255,255,0.3);
+  letter-spacing:2.5px;text-transform:uppercase;
+  margin-top:4px;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════ SIDEBAR ══════════════════════════ -->
+<aside id="sidebar">
+  <div class="sb-logo">
+    <!-- Delta1 Logo SVG -->
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="lg1" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#5ba4f5"/>
+          <stop offset="100%" stop-color="#c9a84c"/>
+        </linearGradient>
+        <linearGradient id="lg2" x1="0" y1="44" x2="44" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#2e7de9" stop-opacity=".3"/>
+          <stop offset="100%" stop-color="#c9a84c" stop-opacity=".15"/>
+        </linearGradient>
+      </defs>
+      <polygon points="22,3 41,38 3,38" fill="url(#lg2)" stroke="url(#lg1)" stroke-width="1.8" stroke-linejoin="round"/>
+      <text x="22" y="32" text-anchor="middle" font-family="'Segoe UI',sans-serif" font-weight="900" font-size="14" fill="url(#lg1)">Δ1</text>
+    </svg>
+    <div>
+      <div class="sb-name">Delta1</div>
+      <div class="sb-tagline">Capital Markets</div>
+    </div>
+  </div>
+
+  <div class="sb-product">
+    <div class="pname">Twin Win</div>
+    <div class="psub">Euro Stoxx 50 · 5Y · European Barrier</div>
+  </div>
+
+  <nav class="sb-nav" id="nav">
+    <div class="ni active" data-s="0"><span class="nn">01</span><span class="ni-ico">🏛️</span><span class="nl">Introduction</span></div>
+    <div class="ni" data-s="1"><span class="nn">02</span><span class="ni-ico">📋</span><span class="nl">Product Overview</span></div>
+    <div class="ni" data-s="2"><span class="nn">03</span><span class="ni-ico">📈</span><span class="nl">Payoff Analysis</span></div>
+    <div class="ni" data-s="3"><span class="nn">04</span><span class="ni-ico">👤</span><span class="nl">Target Client</span></div>
+    <div class="ni" data-s="4"><span class="nn">05</span><span class="ni-ico">🌍</span><span class="nl">Why Euro Stoxx 50</span></div>
+    <div class="ni" data-s="5"><span class="nn">06</span><span class="ni-ico">💼</span><span class="nl">Client Pitch</span></div>
+    <div class="ni" data-s="6"><span class="nn">07</span><span class="ni-ico">⚙️</span><span class="nl">Structuring</span></div>
+    <div class="ni" data-s="7"><span class="nn">08</span><span class="ni-ico">💰</span><span class="nl">Pricing</span></div>
+    <div class="ni" data-s="8"><span class="nn">09</span><span class="ni-ico">🛡️</span><span class="nl">Bank Hedging</span></div>
+    <div class="ni" data-s="9"><span class="nn">10</span><span class="ni-ico">📊</span><span class="nl">Summary</span></div>
+  </nav>
+
+  <div class="sb-foot">
+    <span class="sb-counter" id="counter">1 / 10</span>
+    <div class="sb-pips" id="pips"></div>
+  </div>
+</aside>
+
+<!-- ══════════════════════════ MAIN ══════════════════════════ -->
+<main id="main">
+
+<!-- ═══════════════════ S1 – INTRODUCTION ═══════════════════ -->
+<div class="slide active" id="s1">
+  <canvas id="particles"></canvas>
+  <div class="intro-wrap">
+
+    <div class="intro-logo-row">
+      <svg viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="ilg" x1="0" y1="0" x2="58" y2="58" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#5ba4f5"/>
+            <stop offset="100%" stop-color="#c9a84c"/>
+          </linearGradient>
+          <linearGradient id="ilg2" x1="0" y1="58" x2="58" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#2e7de9" stop-opacity=".25"/>
+            <stop offset="100%" stop-color="#c9a84c" stop-opacity=".12"/>
+          </linearGradient>
+        </defs>
+        <!-- outer glow ring -->
+        <circle cx="29" cy="29" r="27" stroke="url(#ilg)" stroke-width=".6" opacity=".4"/>
+        <!-- triangle -->
+        <polygon points="29,8 50,49 8,49" fill="url(#ilg2)" stroke="url(#ilg)" stroke-width="2" stroke-linejoin="round"/>
+        <text x="29" y="42" text-anchor="middle" font-family="'Segoe UI',sans-serif" font-weight="900" font-size="17" fill="url(#ilg)">Δ1</text>
+      </svg>
+      <div>
+        <div class="il-name">Delta1 Capital</div>
+        <div class="il-sub">Structured Products Division</div>
+      </div>
+    </div>
+
+    <div class="intro-badges">
+      <span class="tag tb">Capital Protected</span>
+      <span class="tag tg">Equity Linked</span>
+      <span class="tag tn">Bilateral Participation</span>
+    </div>
+
+    <div class="intro-ht">Twin Win<br>Certificate</div>
+
+    <div class="intro-sub">
+      A 5-year capital-protected note on the Euro Stoxx 50<sup>®</sup> that delivers
+      <strong>positive performance in both rising and falling markets</strong> — as long as the index
+      does not close below the −35% barrier at maturity.
+    </div>
+
+    <div class="intro-stats">
+      <div class="ist"><label>Underlying</label><span>Euro Stoxx 50®</span></div>
+      <div class="ist"><label>Maturity</label><span>5 Years</span></div>
+      <div class="ist"><label>Capital Protection</label><span>100% (no breach)</span></div>
+      <div class="ist"><label>Barrier Level</label><span>−35% European</span></div>
+      <div class="ist"><label>Participation</label><span>100% Both Ways</span></div>
+    </div>
+
+  </div>
+
+  <!-- QR Code — auto-generated from deployed URL -->
+  <div class="intro-qr">
+    <img id="qr-code" src="" alt="QR Code — scan to open on mobile" onclick="openQrModal()" />
+    <div class="qr-label">Scan to open on mobile</div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════ S2 – PRODUCT OVERVIEW ═══════════════════ -->
+<div class="slide" id="s2">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <div class="inner">
+    <div class="ey">Product Overview</div>
+    <div class="sh">How the Twin Win Works</div>
+    <div class="div"></div>
+
+    <div class="g2 mb">
+      <div class="flex-col gap-sm" style="display:flex;flex-direction:column;gap:12px">
+        <div class="c bl ac">
+          <h3>The Core Mechanism</h3>
+          <p>At maturity, the Twin Win observes the final level of the Euro Stoxx 50 relative to its initial level. If the index is <strong>above its initial level</strong>, the investor receives the full positive return (1:1 participation). If the index is <strong>below its initial level but above the −35% barrier</strong>, the negative return is <strong>converted into an equivalent positive return</strong> — this is the "twin win" effect. Only if the index closes <strong>below −35%</strong> at maturity does the investor participate directly in the loss.</p>
+        </div>
+        <div class="c go ac">
+          <h3>The Trade-Off</h3>
+          <p>The bilateral upside is financed by selling a deeply out-of-the-money put option at the barrier level, and by giving up dividends over the life of the product. This is the cost of the twin win: the investor accepts a defined tail-risk exposure in exchange for the ability to profit in either market direction.</p>
+        </div>
+      </div>
+
+      <div class="flex-col gap-sm" style="display:flex;flex-direction:column;gap:12px">
+        <div class="fm ac" style="opacity:1;">
+          <div class="fl">Payoff at Maturity — Barrier Not Breached</div>
+          <div style="margin-bottom:8px"><strong>Market rises (S<sub>T</sub> ≥ S<sub>0</sub>) :</strong>&nbsp;&nbsp; Nominal × (1 + R)</div>
+          <div><strong>Market falls (S<sub>0</sub> × 65% &lt; S<sub>T</sub> &lt; S<sub>0</sub>) :</strong>&nbsp;&nbsp; Nominal × (1 + |R|)</div>
+        </div>
+        <div class="fm ac" style="opacity:1;border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.05)">
+          <div class="fl" style="color:var(--red)">Barrier Breach — S<sub>T</sub> ≤ 65% × S<sub>0</sub></div>
+          <div>Payoff = Nominal × S<sub>T</sub> / S<sub>0</sub> &nbsp;&nbsp;→&nbsp;&nbsp; direct loss</div>
+        </div>
+        <div class="c re ac">
+          <h3>⚠️ Key Risk</h3>
+          <p>The European barrier is only observed <strong>at maturity</strong> (not daily). The index can fall below −35% during the product's life and recover — the barrier is not breached unless the index closes below −35% <em>on the final fixing date</em>. This is significantly less restrictive than an American barrier.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="g4">
+      <div class="c ac" style="text-align:center">
+        <div class="bn go">100%</div>
+        <p style="font-size:11.5px;margin-top:5px">Capital protected<br>at maturity (no breach)</p>
+      </div>
+      <div class="c ac" style="text-align:center">
+        <div class="bn gr">+100%</div>
+        <p style="font-size:11.5px;margin-top:5px">Participation in upside<br>if market rises</p>
+      </div>
+      <div class="c ac" style="text-align:center">
+        <div class="bn gr">+100%</div>
+        <p style="font-size:11.5px;margin-top:5px">Downside mirrored<br>to positive gain</p>
+      </div>
+      <div class="c ac" style="text-align:center">
+        <div class="bn re">−35%</div>
+        <p style="font-size:11.5px;margin-top:5px">European barrier —<br>checked at maturity only</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ S3 – PAYOFF ANALYSIS ═══════════════════ -->
+<div class="slide" id="s3">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <div class="inner">
+    <div class="ey">Visual Payoff Analysis</div>
+    <div class="sh">Interactive Payoff Diagram</div>
+    <div class="div"></div>
+
+    <div class="sc-btns">
+      <button class="scb on" id="btn-all"    onclick="setScenario('all',this)">Full Picture</button>
+      <button class="scb"    id="btn-bull"   onclick="setScenario('bull',this)">📈 Bull Market</button>
+      <button class="scb"    id="btn-bear"   onclick="setScenario('bear',this)">📉 Bear Market (Twin Win Zone)</button>
+      <button class="scb"    id="btn-breach" onclick="setScenario('breach',this)">⚠️ Barrier Breach</button>
+      <button class="scb"    id="btn-flat"   onclick="setScenario('flat',this)">➡️ Flat Market</button>
+    </div>
+
+    <div class="chart-wrap">
+      <canvas id="payoffChart"></canvas>
+    </div>
+
+    <div class="se-box" id="se-box" style="display:none">
+      <div class="se-ico" id="se-ico"></div>
+      <div>
+        <div class="se-t" id="se-t"></div>
+        <div class="se-d" id="se-d"></div>
+      </div>
+    </div>
+
+    <!-- Zone legend -->
+    <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,.6)">
+        <div style="width:28px;height:3px;background:var(--red);border-radius:2px"></div> Breach Zone
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,.6)">
+        <div style="width:28px;height:3px;background:var(--accent);border-radius:2px"></div> Twin Win Zone
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,.6)">
+        <div style="width:28px;height:3px;background:var(--green);border-radius:2px"></div> Bull Zone
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,.6)">
+        <div style="width:28px;height:3px;background:rgba(255,255,255,.3);border-radius:2px;border:1px dashed rgba(255,255,255,.3)"></div> 1:1 Index Benchmark
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ S4 – TARGET CLIENT ═══════════════════ -->
+<div class="slide" id="s4">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <div class="inner" style="gap:0">
+    <div class="ey">Target Client</div>
+    <div class="sh">Who Should Invest in the Twin Win?</div>
+    <div class="div" style="margin-bottom:18px"></div>
+
+    <!-- Hero investor persona -->
+    <div style="display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,rgba(91,164,245,0.12),rgba(46,125,233,0.06));border:1px solid rgba(91,164,245,0.28);border-radius:14px;padding:16px 22px;margin-bottom:18px">
+      <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;box-shadow:0 0 20px rgba(91,164,245,0.35)">👤</div>
+      <div style="flex:1">
+        <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px">The Wealth Preservation Seeker</div>
+        <div style="font-size:12.5px;color:rgba(255,255,255,0.65);line-height:1.5">Capital-conscious, directionally neutral, 5-year horizon. Wants equity-like performance <em>without</em> a directional bet — and with a known worst case.</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-shrink:0">
+        <div style="text-align:center;background:rgba(255,255,255,0.05);border-radius:10px;padding:10px 16px">
+          <div style="font-size:22px;font-weight:900;color:var(--accent)">5Y</div>
+          <div style="font-size:10px;color:var(--gray);margin-top:2px">Horizon</div>
+        </div>
+        <div style="text-align:center;background:rgba(255,255,255,0.05);border-radius:10px;padding:10px 16px">
+          <div style="font-size:22px;font-weight:900;color:var(--green)">100%</div>
+          <div style="font-size:10px;color:var(--gray);margin-top:2px">Capital floor</div>
+        </div>
+        <div style="text-align:center;background:rgba(255,255,255,0.05);border-radius:10px;padding:10px 16px">
+          <div style="font-size:22px;font-weight:900;color:var(--gold)">±</div>
+          <div style="font-size:10px;color:var(--gray);margin-top:2px">Direction</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 key traits -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+
+      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:16px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(91,164,245,0.45)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.09)'">
+        <div style="font-size:26px">🧭</div>
+        <div style="font-size:13px;font-weight:800;color:#fff">No Market View</div>
+        <div style="font-size:11.5px;color:rgba(255,255,255,0.55);line-height:1.45">Uncertain whether markets will rise or fall. Twin Win pays in <em>both</em> directions — no bet required.</div>
+      </div>
+
+      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:16px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(91,164,245,0.45)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.09)'">
+        <div style="font-size:26px">🛡️</div>
+        <div style="font-size:13px;font-weight:800;color:#fff">Capital First</div>
+        <div style="font-size:11.5px;color:rgba(255,255,255,0.55);line-height:1.45">Bond investor seeking equity upside, but unwilling to accept open-ended losses. 100% floor is the anchor.</div>
+      </div>
+
+      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:16px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(91,164,245,0.45)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.09)'">
+        <div style="font-size:26px">⏳</div>
+        <div style="font-size:13px;font-weight:800;color:#fff">Patient Capital</div>
+        <div style="font-size:11.5px;color:rgba(255,255,255,0.55);line-height:1.45">Comfortable locking funds for 5 years. No income need during the period — all performance at maturity.</div>
+      </div>
+
+      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:16px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(201,168,76,0.45)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.09)'">
+        <div style="font-size:26px">⚠️</div>
+        <div style="font-size:13px;font-weight:800;color:#fff">Known Worst Case</div>
+        <div style="font-size:11.5px;color:rgba(255,255,255,0.55);line-height:1.45">Accepts defined tail risk: if index crashes &gt;35%, capital protection disappears. Risk is bounded and disclosed.</div>
+      </div>
+    </div>
+
+    <!-- Bottom: Segments + Not recommended -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+
+      <!-- Investor segments -->
+      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px">
+        <div style="font-size:11px;letter-spacing:2px;color:var(--gray);text-transform:uppercase;margin-bottom:10px">Target segments</div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px">
+          <span style="background:rgba(91,164,245,0.15);border:1px solid rgba(91,164,245,0.3);color:rgba(255,255,255,0.85);font-size:11px;padding:5px 12px;border-radius:20px;font-weight:600">🏦 Private Banking / HNWIs</span>
+          <span style="background:rgba(91,164,245,0.15);border:1px solid rgba(91,164,245,0.3);color:rgba(255,255,255,0.85);font-size:11px;padding:5px 12px;border-radius:20px;font-weight:600">🏛️ Family Offices</span>
+          <span style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);color:rgba(255,255,255,0.85);font-size:11px;padding:5px 12px;border-radius:20px;font-weight:600">🏢 Insurance Companies</span>
+          <span style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);color:rgba(255,255,255,0.85);font-size:11px;padding:5px 12px;border-radius:20px;font-weight:600">📊 Pension Funds</span>
+          <span style="background:rgba(91,164,245,0.15);border:1px solid rgba(91,164,245,0.3);color:rgba(255,255,255,0.85);font-size:11px;padding:5px 12px;border-radius:20px;font-weight:600">⚖️ Balanced Profiles</span>
+          <span style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);color:rgba(255,255,255,0.85);font-size:11px;padding:5px 12px;border-radius:20px;font-weight:600">🎓 Endowment Funds</span>
+        </div>
+      </div>
+
+      <!-- Not recommended -->
+      <div style="background:rgba(220,53,69,0.06);border:1px solid rgba(220,53,69,0.2);border-radius:12px;padding:14px 16px">
+        <div style="font-size:11px;letter-spacing:2px;color:var(--gray);text-transform:uppercase;margin-bottom:10px">Not recommended for</div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.7)">
+            <span style="color:var(--red);font-size:14px;line-height:1">✕</span>
+            <span>Clients needing <strong style="color:#fff">liquidity</strong> before 5 years</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.7)">
+            <span style="color:var(--red);font-size:14px;line-height:1">✕</span>
+            <span>Strong bulls seeking <strong style="color:#fff">full upside leverage</strong></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.7)">
+            <span style="color:var(--red);font-size:14px;line-height:1">✕</span>
+            <span>Investors needing <strong style="color:#fff">regular income</strong> (coupons / dividends)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.7)">
+            <span style="color:var(--red);font-size:14px;line-height:1">✕</span>
+            <span>Capital-guaranteed purists who accept <strong style="color:#fff">zero risk whatsoever</strong></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ S5 – WHY EURO STOXX 50 ═══════════════════ -->
+<div class="slide" id="s5">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <div class="inner">
+    <div class="ey">Underlying Rationale</div>
+    <div class="sh">Why the Euro Stoxx 50® as Underlying?</div>
+    <div class="div"></div>
+
+    <div class="g3 mb">
+      <div class="c bl ac">
+        <h3>🌍 Deep Derivatives Market</h3>
+        <p>The Euro Stoxx 50 options market (Eurex) is one of the most liquid in the world. Tight bid-ask spreads on calls, puts and barrier options are critical: they allow the structuring desk to buy the ATM straddle and sell the OTM put at competitive prices, resulting in better payoff terms for the client.</p>
+      </div>
+      <div class="c go ac">
+        <h3>💹 High Dividend Yield — The Funding Engine</h3>
+        <p>The SX5E yields ~3.2–3.5% p.a. in dividends. Since the investor receives a certificate (not the index directly), these dividends are <strong>not distributed</strong>. Over 5 years, the present value of foregone dividends (~16–18% total) is the primary budget used to purchase the embedded option overlay that creates the Twin Win payoff.</p>
+      </div>
+      <div class="c gr ac">
+        <h3>📊 Rich Implied Volatility &amp; Skew</h3>
+        <p>The SX5E consistently trades with elevated implied volatility and a pronounced downside skew (put options are relatively expensive vs. calls). This benefits the structure: the short OTM put (sold at 65%) commands a richer premium due to the skew, reducing the net cost of the strategy and improving product terms.</p>
+      </div>
+      <div class="c ac">
+        <h3>🔁 Mean-Reversion Tendency</h3>
+        <p>Historically over 5-year rolling windows, the SX5E has rarely breached −35% and sustained it to maturity. The probability of a European barrier breach at −35% over 5 years is estimated at ~12–18% (using Black-Scholes with historical vol). This makes the capital protection credible rather than theoretical.</p>
+      </div>
+      <div class="c ac">
+        <h3>🏛️ Regulatory Comfort &amp; Transparency</h3>
+        <p>European private clients and institutional investors are deeply familiar with the SX5E. It is PRIIPS-compliant, easily described in a KID document, and its composition (50 blue-chip Eurozone stocks) is fully transparent — no exoticism or opacity concerns when selling to regulated clients.</p>
+      </div>
+      <div class="c ac">
+        <h3>📉 Diversification &amp; Stability</h3>
+        <p>50 leading companies across 11 Eurozone countries provides strong natural diversification. Single-stock idiosyncratic events (fraud, sector shock) have a muted impact on the index, keeping the barrier breach probability stable and making the structure more predictable to price and risk-manage.</p>
+      </div>
+    </div>
+
+    <div class="c glow ac" style="padding:18px 22px">
+      <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <h3 style="color:var(--gold)">The Dividend Yield: Why It Matters</h3>
+          <p style="font-size:12.5px;margin-top:6px">A higher dividend yield directly improves product terms. More foregone dividends → larger option budget → either <strong>higher participation rate</strong>, <strong>deeper barrier</strong>, or <strong>added features</strong>. The SX5E's ~3.3% yield over 5Y generates roughly €165 of option budget per €1,000 invested — sufficient to buy the ATM straddle after funding the zero-coupon bond and selling the OTM put.</p>
+        </div>
+        <div style="text-align:center"><div class="bn go">3.3%</div><p style="font-size:11px;margin-top:4px">Annual div. yield<br>funds the option overlay</p></div>
+        <div style="text-align:center"><div class="bn" style="color:var(--accent2)">~15%</div><p style="font-size:11px;margin-top:4px">Historical prob. of<br>5Y breach below −35%</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ S6 – CLIENT PITCH ═══════════════════ -->
+<div class="slide" id="s6">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <div class="inner">
+    <div class="ey">Sales Pitch</div>
+    <div class="sh">The Client Pitch &amp; Risk Disclosure</div>
+    <div class="div"></div>
+
+    <div class="g2 mb">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="c glow ac">
+          <h3>The Pitch</h3>
+          <p style="font-size:14px;line-height:1.85;margin-top:8px">
+            "You are <strong>uncertain about market direction</strong> over the next 5 years — and in the current macro environment, that is the only rational position to hold. With the Twin Win, <strong>you don't need to be right about direction</strong>. Whether the Euro Stoxx 50 rises 20% or falls 20%, you earn 20%. Your capital is <strong>fully protected</strong> at maturity unless we see a severe market crash beyond −35% — a scenario that has historically occurred only in the most extreme bear markets. This is structured finance giving you an edge: <strong>two ways to win, one defined risk</strong>."
+          </p>
+        </div>
+        <div class="c go ac">
+          <h3>3 Market Timing Arguments</h3>
+          <ul class="bl" style="margin-top:8px">
+            <li><strong>Elevated implied volatility</strong> makes the straddle at the heart of the structure relatively valuable — in high-vol environments, structured products with embedded long vol positions offer better participation terms to clients.</li>
+            <li><strong>Rate normalization</strong> — as central bank rates decline, the discount factor on the zero-coupon bond improves, freeing additional budget for the option overlay without increasing cost to the client.</li>
+            <li><strong>Peak uncertainty</strong> — when neither a strong bull nor bear case is consensus, the Twin Win's direction-agnostic payoff is uniquely compelling vs. plain equity or pure fixed income.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="c ac">
+          <h3>What the Client Is Exposed To</h3>
+          <table style="margin-top:8px">
+            <tr><th>Risk Factor</th><th>Description</th><th>Severity</th></tr>
+            <tr>
+              <td>Barrier Breach</td>
+              <td>If SX5E &lt; −35% at maturity: capital loss equals the index loss directly (e.g., −45% index → −45% return)</td>
+              <td><span class="tag tr">High</span></td>
+            </tr>
+            <tr>
+              <td>Issuer Credit Risk</td>
+              <td>The note is an unsecured obligation of the issuing bank. In the event of bank default, the investor loses their capital regardless of index performance</td>
+              <td><span class="tag tr">High</span></td>
+            </tr>
+            <tr>
+              <td>Liquidity Risk</td>
+              <td>No active secondary market; exit before maturity is at the bank's bid price which may be significantly below fair value due to vol/rates/time effects</td>
+              <td><span class="tag tg">Medium</span></td>
+            </tr>
+            <tr>
+              <td>Opportunity Cost</td>
+              <td>Dividends (~3.3% p.a.) are forgone to finance the structure. In a strong bull market, a plain index investment would outperform once dividends are included</td>
+              <td><span class="tag tb">Low–Med</span></td>
+            </tr>
+            <tr>
+              <td>Flat Market</td>
+              <td>If the index returns exactly 0% at maturity, the investor receives their capital back with no return — below inflation in real terms</td>
+              <td><span class="tag tb">Low</span></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ S7 – STRUCTURING ═══════════════════ -->
+<div class="slide" id="s7">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <div class="inner">
+    <div class="ey">Structuring &amp; Replication</div>
+    <div class="sh">How Is the Twin Win Built?</div>
+    <div class="div"></div>
+
+    <div class="g2 mb">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="c bl ac">
+          <h3>Option Decomposition</h3>
+          <p style="font-size:12.5px;margin-bottom:10px">The Twin Win payoff can be replicated exactly by a portfolio of vanilla options. Understanding this decomposition is key to both pricing and hedging:</p>
+          <table>
+            <tr><th>Component</th><th>Position</th><th>Role</th></tr>
+            <tr><td><strong>Zero-Coupon Bond</strong> (5Y)</td><td><span style="color:var(--green)">Long</span></td><td>Guarantees 100% capital return at maturity. Costs ~85% of notional at 3.2% rate.</td></tr>
+            <tr><td><strong>ATM Call</strong> (Strike = S₀)</td><td><span style="color:var(--green)">Long</span></td><td>Captures upside participation — pays if index rises above initial level.</td></tr>
+            <tr><td><strong>ATM Put</strong> (Strike = S₀)</td><td><span style="color:var(--green)">Long</span></td><td>Converts downside to positive — pays if index falls below initial level (the "mirror" effect).</td></tr>
+            <tr><td><strong>OTM Put</strong> (Strike = 65%×S₀)</td><td><span style="color:var(--red)">Short</span></td><td>Finances the structure and defines the barrier. Selling this put introduces the tail-risk exposure.</td></tr>
+          </table>
+        </div>
+        <div class="fm ac" style="opacity:1">
+          <div class="fl">Replication Identity</div>
+          <div style="margin-bottom:8px">Twin Win = ZCB + Call(S₀) + Put(S₀) − Put(65%·S₀)</div>
+          <div style="font-size:12px;color:var(--gray)">Straddle = Call(S₀) + Put(S₀) &nbsp;→&nbsp; profits from large moves in either direction</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="c go ac">
+          <h3>Funding Mechanism</h3>
+          <ul class="bl" style="margin-top:8px">
+            <li><strong>Zero-coupon bond costs ~85%</strong> of notional (at 3.2% risk-free rate over 5Y). This leaves ~15% of notional to fund the option overlay.</li>
+            <li><strong>Foregone dividends (~16–18% PV over 5Y)</strong> are the primary funding source for the straddle premium. The client does not receive index dividends — they are monetized by the bank to buy the options.</li>
+            <li><strong>Short OTM put (strike 65%) raises additional premium</strong> (~4–6% depending on vol skew) to bridge any funding gap. This is the "price" of the capital protection — the investor implicitly sells a deep put.</li>
+            <li><strong>Bank margin (~1%)</strong> is baked into the pricing and covers distribution costs, hedging friction, and CVA.</li>
+          </ul>
+        </div>
+        <div class="c re ac">
+          <h3>Why the Short OTM Put Creates the Barrier</h3>
+          <p style="font-size:12.5px;margin-top:6px">When the index finishes below 65% of its initial level, the short 65%-strike put is in the money by the amount of the decline. This exactly offsets the value of the long put (strike = S₀), which would otherwise have converted the loss to a gain. The net result: below −35%, the twin win and capital protection both disappear, and the investor bears the full loss — as if they owned the index directly.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="c ac" style="padding:14px 18px">
+      <div class="flow">
+        <div class="fb" style="background:rgba(46,125,233,0.1);border-color:rgba(46,125,233,0.35)">
+          <div class="fl">Investor</div><div class="fn">Pays €1,000</div>
+        </div>
+        <div class="farr"><span>→</span><span class="fal">notional</span></div>
+        <div class="fb">
+          <div class="fl">Issuing Bank</div><div class="fn">Structures Product</div>
+        </div>
+        <div class="farr"><span>→</span><span class="fal">buys ZCB</span></div>
+        <div class="fb" style="background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.35)">
+          <div class="fl">Bond Market</div><div class="fn">~€853 invested</div>
+        </div>
+        <div class="farr"><span>→</span><span class="fal">~€147 budget</span></div>
+        <div class="fb">
+          <div class="fl">Derivatives Desk</div><div class="fn">Straddle − OTM Put</div>
+        </div>
+        <div class="farr"><span>→</span><span class="fal">delta hedge</span></div>
+        <div class="fb" style="background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.3)">
+          <div class="fl">Market</div><div class="fn">SX5E Futures + Vol</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ S8 – PRICING ═══════════════════ -->
+<div class="slide" id="s8">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <div class="inner" style="gap:0;padding-bottom:14px">
+    <div class="ey">Pricing &amp; Valuation</div>
+    <div class="sh">How Is the Twin Win Priced? — Interactive Black-Scholes Model</div>
+    <div class="div" style="margin-bottom:14px"></div>
+
+    <div style="display:grid;grid-template-columns:285px 1fr;gap:16px;flex:1;min-height:0;overflow:hidden">
+
+      <!-- ═══ LEFT — Parameter Panel ═══ -->
+      <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:0;overflow-y:auto">
+
+        <div style="font-size:8.5px;letter-spacing:2.5px;color:var(--gray);text-transform:uppercase;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,0.07)">📈 Market</div>
+
+        <!-- r -->
+        <div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <span style="font-size:11px;color:rgba(255,255,255,0.75);font-weight:600">Risk-Free Rate <em style="color:var(--gray);font-size:9.5px">(r)</em></span>
+            <span style="background:rgba(91,164,245,0.18);border:1px solid rgba(91,164,245,0.35);color:var(--accent);font-size:12px;font-weight:800;padding:1px 8px;border-radius:8px;font-variant-numeric:tabular-nums" id="pr-r-val">3.2%</span>
+          </div>
+          <input class="pslider" id="pr-r" type="range" min="0.5" max="6" step="0.1" value="3.2">
+          <div style="font-size:9px;color:var(--gray);margin-top:3px;line-height:1.35">↑ Higher → Zero-Coupon Bond cheaper → more option budget</div>
+        </div>
+
+        <!-- q -->
+        <div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <span style="font-size:11px;color:rgba(255,255,255,0.75);font-weight:600">Dividend Yield <em style="color:var(--gray);font-size:9.5px">(q)</em></span>
+            <span style="background:rgba(91,164,245,0.18);border:1px solid rgba(91,164,245,0.35);color:var(--accent);font-size:12px;font-weight:800;padding:1px 8px;border-radius:8px;font-variant-numeric:tabular-nums" id="pr-q-val">3.3%</span>
+          </div>
+          <input class="pslider" id="pr-q" type="range" min="1" max="6" step="0.1" value="3.3">
+          <div style="font-size:9px;color:var(--gray);margin-top:3px;line-height:1.35">↑ Higher → lower forward price → Straddle cheaper</div>
+        </div>
+
+        <!-- σ -->
+        <div style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <span style="font-size:11px;color:rgba(255,255,255,0.75);font-weight:600">Implied Volatility <em style="color:var(--gray);font-size:9.5px">(σ)</em></span>
+            <span style="background:rgba(91,164,245,0.18);border:1px solid rgba(91,164,245,0.35);color:var(--accent);font-size:12px;font-weight:800;padding:1px 8px;border-radius:8px;font-variant-numeric:tabular-nums" id="pr-sigma-val">18.0%</span>
+          </div>
+          <input class="pslider" id="pr-sigma" type="range" min="10" max="40" step="0.5" value="18">
+          <div style="font-size:9px;color:var(--gray);margin-top:3px;line-height:1.35">↑ Higher → Straddle more expensive → margin squeezed</div>
+        </div>
+
+        <div style="font-size:8.5px;letter-spacing:2.5px;color:var(--gray);text-transform:uppercase;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,0.07)">📐 Product Terms</div>
+
+        <!-- T -->
+        <div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <span style="font-size:11px;color:rgba(255,255,255,0.75);font-weight:600">Maturity <em style="color:var(--gray);font-size:9.5px">(T)</em></span>
+            <span style="background:rgba(91,164,245,0.18);border:1px solid rgba(91,164,245,0.35);color:var(--accent);font-size:12px;font-weight:800;padding:1px 8px;border-radius:8px;font-variant-numeric:tabular-nums" id="pr-T-val">5.0 Y</span>
+          </div>
+          <input class="pslider" id="pr-T" type="range" min="1" max="7" step="0.5" value="5">
+          <div style="font-size:9px;color:var(--gray);margin-top:3px;line-height:1.35">↑ Longer → more foregone dividends → bigger option budget</div>
+        </div>
+
+        <!-- B -->
+        <div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <span style="font-size:11px;color:rgba(255,255,255,0.75);font-weight:600">Barrier Level <em style="color:var(--gray);font-size:9.5px">(B)</em></span>
+            <span style="background:rgba(91,164,245,0.18);border:1px solid rgba(91,164,245,0.35);color:var(--accent);font-size:12px;font-weight:800;padding:1px 8px;border-radius:8px;font-variant-numeric:tabular-nums" id="pr-B-val">65%</span>
+          </div>
+          <input class="pslider" id="pr-B" type="range" min="50" max="85" step="1" value="65">
+          <div style="font-size:9px;color:var(--gray);margin-top:3px;line-height:1.35">↑ Higher barrier → OTM Put cheaper → less margin but more breach risk</div>
+        </div>
+
+        <!-- Skew -->
+        <div style="margin-bottom:0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <span style="font-size:11px;color:rgba(255,255,255,0.75);font-weight:600">Vol Skew <em style="color:var(--gray);font-size:9.5px">(25Δ RR)</em></span>
+            <span style="background:rgba(91,164,245,0.18);border:1px solid rgba(91,164,245,0.35);color:var(--accent);font-size:12px;font-weight:800;padding:1px 8px;border-radius:8px;font-variant-numeric:tabular-nums" id="pr-sk-val">−3.0%</span>
+          </div>
+          <input class="pslider" id="pr-sk" type="range" min="-8" max="0" step="0.5" value="-3">
+          <div style="font-size:9px;color:var(--gray);margin-top:3px;line-height:1.35">↑ Steeper skew → OTM Put richer → more premium received</div>
+        </div>
+
+        <!-- Reset -->
+        <div style="margin-top:auto;padding-top:14px">
+          <button id="btn-reset" onclick="resetPricer()" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.13);color:rgba(255,255,255,0.65);font-size:11px;padding:9px 0;border-radius:9px;cursor:pointer;transition:all .25s;font-weight:600;letter-spacing:0.5px" onmouseover="this.style.background='rgba(91,164,245,0.18)';this.style.borderColor='rgba(91,164,245,0.45)';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.borderColor='rgba(255,255,255,0.13)';this.style.color='rgba(255,255,255,0.65)'">↺&nbsp;&nbsp;Reset to product defaults</button>
+        </div>
+      </div>
+
+      <!-- ═══ RIGHT — Waterfall Visualization ═══ -->
+      <div style="display:flex;flex-direction:column;gap:11px;min-height:0;overflow:hidden">
+
+        <!-- Waterfall chart -->
+        <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.08);border-radius:13px;padding:14px 18px 10px;flex:1;display:flex;flex-direction:column;min-height:0">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-shrink:0">
+            <div>
+              <div style="font-size:12.5px;font-weight:700;color:#fff">Cost Bridge — How is €100 structured?</div>
+              <div style="font-size:10px;color:rgba(255,255,255,0.38);margin-top:3px">Margin = €100 + Foregone Dividends − Zero-Coupon Bond − Straddle + OTM Put sold</div>
+            </div>
+          </div>
+          <div style="flex:1;min-height:0;position:relative">
+            <canvas id="pr-waterfall" style="display:block"></canvas>
+          </div>
+        </div>
+
+        <!-- Bottom: Margin + 2 metrics -->
+        <div style="display:grid;grid-template-columns:1.7fr 1fr 1fr;gap:10px;flex-shrink:0">
+
+          <!-- Margin (big) -->
+          <div class="mbox ok" id="pr-mbox" style="border-radius:12px;padding:13px 18px">
+            <div>
+              <div style="font-size:8.5px;letter-spacing:2px;color:var(--gray);text-transform:uppercase;margin-bottom:5px">Bank Margin — per €100 sold</div>
+              <div style="font-size:32px;font-weight:900;line-height:1;transition:color .4s" id="pr-margin-val">—</div>
+              <div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:5px" id="pr-margin-sub">—</div>
+            </div>
+            <div style="font-size:36px;transition:all .3s;align-self:center" id="pr-margin-ico">✅</div>
+          </div>
+
+          <!-- Dividend funding -->
+          <div style="background:rgba(20,184,166,0.07);border:1px solid rgba(20,184,166,0.2);border-radius:12px;padding:13px 15px;display:flex;flex-direction:column;justify-content:space-between">
+            <div style="font-size:8px;letter-spacing:1.5px;color:var(--gray);text-transform:uppercase">Dividend Funding</div>
+            <div style="font-size:26px;font-weight:900;color:#2dd4bf;font-variant-numeric:tabular-nums;margin-top:6px" id="mt-pvdiv">—</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);margin-top:3px">PV of foregone dividends — the key funding engine</div>
+          </div>
+
+          <!-- Breach Prob -->
+          <div style="background:rgba(220,53,69,0.07);border:1px solid rgba(220,53,69,0.2);border-radius:12px;padding:13px 15px;display:flex;flex-direction:column;justify-content:space-between">
+            <div style="font-size:8px;letter-spacing:1.5px;color:var(--gray);text-transform:uppercase">Barrier Breach Prob.</div>
+            <div style="font-size:26px;font-weight:900;color:var(--red);font-variant-numeric:tabular-nums;margin-top:6px" id="mt-bp">—</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);margin-top:3px">Q-measure probability of barrier hit</div>
+          </div>
+
+        </div>
+
+      </div><!-- /right -->
+    </div><!-- /main grid -->
+  </div>
+</div>
+
+<!-- ═══════════════════ S9 – BANK HEDGING ═══════════════════ -->
+<div class="slide" id="s9">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <div class="inner">
+    <div class="ey">Risk Management</div>
+    <div class="sh">Bank Exposure &amp; Hedging Strategy</div>
+    <div class="div"></div>
+
+    <div class="g2 mb">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="c re ac">
+          <h3>What Is the Bank Exposed To?</h3>
+          <table style="margin-top:8px">
+            <tr><th>Risk</th><th>Direction</th><th>Explanation</th></tr>
+            <tr>
+              <td>Delta (spot risk)</td>
+              <td><span style="color:var(--accent)">≈ Neutral</span></td>
+              <td>The straddle is delta-neutral at inception. As spot moves, delta becomes non-zero and must be rebalanced continuously (dynamic hedging).</td>
+            </tr>
+            <tr>
+              <td>Gamma</td>
+              <td><span style="color:var(--green)">Long +</span></td>
+              <td>Being long a straddle makes the bank long gamma. Large spot moves (in either direction) generate mark-to-market gains for the bank — this is gamma scalping P&amp;L.</td>
+            </tr>
+            <tr>
+              <td>Vega (vol risk)</td>
+              <td><span style="color:var(--red)">Long +</span></td>
+              <td>The bank is long implied volatility via the straddle. If vol drops after issuance, the MTM value of the structure falls for the bank. Must be actively managed.</td>
+            </tr>
+            <tr>
+              <td>Theta (time decay)</td>
+              <td><span style="color:var(--red)">Short −</span></td>
+              <td>Long gamma and long vega positions naturally decay over time (theta is negative). The bank "pays" theta daily while waiting for vol/gamma P&amp;L to materialize.</td>
+            </tr>
+            <tr>
+              <td>Skew / Smile Risk</td>
+              <td><span style="color:var(--gold)">Short skew</span></td>
+              <td>Selling the 65%-strike put means the bank is exposed to skew: if the put's implied vol (relative to ATM) increases, the mark-to-market cost of the short put rises.</td>
+            </tr>
+            <tr>
+              <td>Dividend Risk</td>
+              <td><span style="color:var(--red)">Long div</span></td>
+              <td>The structure is funded by expected dividends. If SX5E companies cut dividends, the funding assumptions deteriorate, squeezing the bank's margin.</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="c bl ac">
+          <h3>Hedging Strategy — The 5 Pillars</h3>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+            <div>
+              <div style="font-size:12.5px;color:#fff;font-weight:700;margin-bottom:3px">1. Dynamic Delta Hedging</div>
+              <p style="font-size:12px">The trading desk buys and sells SX5E futures (or ETFs) continuously to maintain a delta-neutral book. As spot moves, the required hedge quantity changes — the bank rebalances, buying futures when the index falls and selling when it rises (gamma scalping).</p>
+            </div>
+            <div>
+              <div style="font-size:12.5px;color:#fff;font-weight:700;margin-bottom:3px">2. Vega Hedging</div>
+              <p style="font-size:12px">The bank uses variance swaps, volatility futures (VSTOXX), or vanilla options across tenors to hedge the vega exposure from the long straddle. Reducing vega sensitivity protects P&amp;L against sudden vol collapses.</p>
+            </div>
+            <div>
+              <div style="font-size:12.5px;color:#fff;font-weight:700;margin-bottom:3px">3. Skew Hedging</div>
+              <p style="font-size:12px">The short OTM put creates a negative skew exposure. The desk may purchase OTM put spreads to offset this, or use an OTM put ladder to neutralize the skew position at acceptable cost.</p>
+            </div>
+            <div>
+              <div style="font-size:12.5px;color:#fff;font-weight:700;margin-bottom:3px">4. Dividend Hedging</div>
+              <p style="font-size:12px">Forward dividend assumptions are locked in using SX5E dividend futures or a dividend swap, eliminating the risk that corporate dividend cuts reduce the product funding.</p>
+            </div>
+            <div>
+              <div style="font-size:12.5px;color:#fff;font-weight:700;margin-bottom:3px">5. CVA Management</div>
+              <p style="font-size:12px">The bank charges a CVA (Credit Valuation Adjustment) to the client to cover the risk that the bank itself defaults. This is embedded in the 1% structural margin.</p>
+            </div>
+          </div>
+        </div>
+        <div class="c go ac">
+          <h3>Bank P&amp;L Attribution (Expected)</h3>
+          <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
+            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:rgba(34,197,94,0.08);border-radius:8px;font-size:12.5px"><span>Structural margin (upfront)</span><span style="color:var(--green)">+1.0%</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:rgba(34,197,94,0.08);border-radius:8px;font-size:12.5px"><span>Expected gamma scalping P&amp;L</span><span style="color:var(--green)">+0.4–0.6% p.a.</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:rgba(239,68,68,0.08);border-radius:8px;font-size:12.5px"><span>Theta decay cost (long vol positions)</span><span style="color:var(--red)">−0.3–0.4% p.a.</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:rgba(239,68,68,0.08);border-radius:8px;font-size:12.5px"><span>Transaction costs &amp; hedging slippage</span><span style="color:var(--red)">−0.15% p.a.</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:rgba(239,68,68,0.08);border-radius:8px;font-size:12.5px"><span>CVA &amp; funding cost (XVA)</span><span style="color:var(--red)">−0.10% p.a.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ S10 – SUMMARY ═══════════════════ -->
+<div class="slide" id="s10">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <div class="inner">
+    <div class="ey">Executive Summary</div>
+    <div class="sh">Twin Win — At a Glance</div>
+    <div class="div"></div>
+
+    <div class="g3 mb">
+      <div class="c glow ac">
+        <div style="font-size:26px;margin-bottom:8px">🎯</div>
+        <h3>For the Client</h3>
+        <ul class="bl" style="margin-top:8px">
+          <li>Profit whether markets rise <strong>or</strong> fall moderately</li>
+          <li>100% capital protection absent a −35% crash</li>
+          <li>Defined, transparent worst-case scenario</li>
+          <li>European barrier: checked at maturity only</li>
+          <li>Ideal for uncertain macro environments</li>
+        </ul>
+      </div>
+      <div class="c go ac">
+        <div style="font-size:26px;margin-bottom:8px">🏛️</div>
+        <h3>For the Bank</h3>
+        <ul class="bl" style="margin-top:8px">
+          <li>1% upfront structural margin</li>
+          <li>Long gamma → gamma scalping income</li>
+          <li>Hedge via futures, var swaps, div futures</li>
+          <li>Long vega exposure, manageable with vol overlay</li>
+          <li>CVA charged into margin</li>
+        </ul>
+      </div>
+      <div class="c gr ac">
+        <div style="font-size:26px;margin-bottom:8px">📊</div>
+        <h3>Why Euro Stoxx 50</h3>
+        <ul class="bl" style="margin-top:8px">
+          <li>Deep, liquid options market (Eurex)</li>
+          <li>~3.3% dividend yield funds the option overlay</li>
+          <li>Downside skew enriches short OTM put</li>
+          <li>~15% historical 5Y barrier breach probability</li>
+          <li>Familiar, PRIIPS-compliant, transparent</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="c mb ac" style="padding:16px 18px">
+      <h3>All Scenarios — Payoff Summary</h3>
+      <table style="margin-top:8px">
+        <tr><th>Scenario</th><th>SX5E at Maturity</th><th>Client Return</th><th>Mechanism</th><th>Outcome</th></tr>
+        <tr><td>Strong Bull</td><td>+40%</td><td style="color:var(--green);font-weight:700">+40%</td><td>Direct upside participation</td><td><span class="tag tn">Excellent</span></td></tr>
+        <tr><td>Moderate Bull</td><td>+15%</td><td style="color:var(--green);font-weight:700">+15%</td><td>Direct upside participation</td><td><span class="tag tn">Good</span></td></tr>
+        <tr><td>Flat Market</td><td>0%</td><td style="color:var(--gray);font-weight:700">0%</td><td>Capital returned at par</td><td><span class="tag tb">Neutral</span></td></tr>
+        <tr><td>Moderate Bear</td><td>−20%</td><td style="color:var(--green);font-weight:700">+20% ✦</td><td>Twin Win converts loss to gain</td><td><span class="tag tn">Twin Win!</span></td></tr>
+        <tr><td>Strong Bear (no breach)</td><td>−34%</td><td style="color:var(--green);font-weight:700">+34% ✦</td><td>Twin Win at maximum</td><td><span class="tag tn">Twin Win!</span></td></tr>
+        <tr><td>Crash — Barrier Breach</td><td>−45%</td><td style="color:var(--red);font-weight:700">−45%</td><td>Barrier breached at maturity</td><td><span class="tag tr">Loss</span></td></tr>
+      </table>
+    </div>
+
+    <div style="text-align:center;padding:18px 24px;background:linear-gradient(135deg,rgba(46,125,233,0.1),rgba(201,168,76,0.06));border:1px solid var(--border);border-radius:14px" class="ac">
+      <div style="font-size:10px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:9px">Delta1 Capital — Bottom Line</div>
+      <div style="font-size:16px;font-weight:700;color:#fff;max-width:680px;margin:0 auto;line-height:1.55">
+        The Twin Win is the rare structured product that rewards the investor for being right in <em>two directions simultaneously</em> — making it uniquely compelling in an environment where conviction is scarce but capital must be deployed.
+      </div>
+    </div>
+  </div>
+</div>
+
+</main><!-- /main -->
+
+<!-- keyboard hint -->
+<div class="hint">
+  <span>↑</span><span>↓</span>
+</div>
+
+<script>
+/* ═══════════════════ STATE & NAVIGATION ═══════════════════ */
+let cur = 0;
+const slides = document.querySelectorAll('.slide');
+const navItems = document.querySelectorAll('.ni');
+const N = slides.length;
+let chartInst = null;
+
+// Build pips
+const pipsEl = document.getElementById('pips');
+for(let i=0;i<N;i++){const p=document.createElement('div');p.className='pip'+(i===0?' on':'');pipsEl.appendChild(p)}
+
+function goTo(n){
+  if(n===cur)return;
+  slides[cur].classList.remove('active');
+  setTimeout(()=>animateSlide(n),60);
+  slides[cur].classList.add('prev');
+  const prev=cur;
+  cur=(n+N)%N;
+  slides[cur].classList.remove('prev');
+  slides[cur].classList.add('active');
+  setTimeout(()=>{slides[prev].classList.remove('prev')},500);
+  navItems.forEach((ni,i)=>ni.classList.toggle('active',i===cur));
+  document.querySelectorAll('.pip').forEach((p,i)=>p.classList.toggle('on',i===cur));
+  document.getElementById('counter').textContent=(cur+1)+' / '+N;
+  if(cur===2&&!chartInst)setTimeout(initChart,200);
+  if(cur===7)setTimeout(initPricer,150);
+}
+
+navItems.forEach(ni=>ni.addEventListener('click',()=>goTo(+ni.dataset.s)));
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'||e.key==='ArrowRight')goTo(cur+1);
+  if(e.key==='ArrowUp'||e.key==='ArrowLeft')goTo(cur-1);
+});
+
+/* ═══════════════════ PARTICLE BACKGROUND (INTRO) ═══════════════════ */
+(function initParticles(){
+  const canvas=document.getElementById('particles');
+  const ctx=canvas.getContext('2d');
+  let W=0,H=0,pts=[];
+
+  function resize(){
+    const main=document.getElementById('main');
+    const nw=main.clientWidth||window.innerWidth-248;
+    const nh=main.clientHeight||window.innerHeight;
+    if(nw===W&&nh===H)return;
+    W=canvas.width=nw;
+    H=canvas.height=nh;
+    pts=[];
+    for(let i=0;i<75;i++)pts.push(mkPt());
+  }
+  window.addEventListener('resize',resize);
+
+  function mkPt(){return{
+    x:Math.random()*W,y:Math.random()*H,
+    vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,
+    r:Math.random()*1.8+.8,
+    a:Math.random()*.6+.2,
+  }}
+
+  // Animated gradient orbs
+  const orbs=[
+    {x:.7,y:.25,r:320,c:'rgba(46,125,233,',a:.10,dx:.0003,dy:.0002},
+    {x:.2,y:.7,r:260,c:'rgba(201,168,76,',a:.07,dx:-.0002,dy:.0003},
+    {x:.5,y:.5,r:200,c:'rgba(91,164,245,',a:.05,dx:.0004,dy:-.0003},
+  ];
+  let t=0;
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    t+=.005;
+
+    // Draw orbs
+    orbs.forEach(o=>{
+      const ox=(o.x+Math.sin(t*o.dx*200)*.12)*W;
+      const oy=(o.y+Math.cos(t*o.dy*200)*.12)*H;
+      const grd=ctx.createRadialGradient(ox,oy,0,ox,oy,o.r);
+      grd.addColorStop(0,o.c+o.a+')');
+      grd.addColorStop(1,o.c+'0)');
+      ctx.fillStyle=grd;
+      ctx.beginPath();ctx.arc(ox,oy,o.r,0,Math.PI*2);ctx.fill();
+    });
+
+    // Draw connections
+    for(let i=0;i<pts.length;i++){
+      for(let j=i+1;j<pts.length;j++){
+        const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<130){
+          ctx.beginPath();
+          ctx.strokeStyle=`rgba(46,125,233,${.25*(1-d/130)})`;
+          ctx.lineWidth=.6;
+          ctx.moveTo(pts[i].x,pts[i].y);
+          ctx.lineTo(pts[j].x,pts[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Draw particles
+    pts.forEach(p=>{
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(91,164,245,${p.a})`;
+      ctx.fill();
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>W)p.vx*=-1;
+      if(p.y<0||p.y>H)p.vy*=-1;
+    });
+
+    requestAnimationFrame(draw);
+  }
+  // Delay first init until after layout paint so #main has correct dimensions
+  requestAnimationFrame(()=>{resize();draw();});
+})();
+
+/* ═══════════════════ PAYOFF CHART ═══════════════════ */
+
+/* Custom background zones plugin */
+const zonesPlugin={
+  id:'zones',
+  beforeDatasetsDraw(chart){
+    const{ctx,chartArea:{left,right,top,bottom},scales:{x}}=chart;
+    ctx.save();
+    const p35=x.getPixelForValue(-35);
+    const p0 =x.getPixelForValue(0);
+
+    // Zone backgrounds
+    ctx.fillStyle='rgba(239,68,68,0.07)';
+    ctx.fillRect(left,top,Math.min(p35,right)-left,bottom-top);
+
+    ctx.fillStyle='rgba(46,125,233,0.07)';
+    ctx.fillRect(Math.max(p35,left),top,Math.min(p0,right)-Math.max(p35,left),bottom-top);
+
+    ctx.fillStyle='rgba(34,197,94,0.06)';
+    ctx.fillRect(Math.max(p0,left),top,right-Math.max(p0,left),bottom-top);
+
+    // Barrier vertical line at -35%
+    ctx.strokeStyle='rgba(239,68,68,0.55)';
+    ctx.lineWidth=1.5;ctx.setLineDash([6,3]);
+    ctx.beginPath();ctx.moveTo(p35,top);ctx.lineTo(p35,bottom);ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Zero line
+    ctx.strokeStyle='rgba(255,255,255,0.15)';
+    ctx.lineWidth=1;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(p0,top);ctx.lineTo(p0,bottom);ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Zone labels
+    ctx.font='bold 10px Segoe UI';ctx.textAlign='center';
+    const mid35=(left+Math.min(p35,right))/2;
+    const mid0=(Math.max(p35,left)+Math.min(p0,right))/2;
+    const midBull=(Math.max(p0,left)+right)/2;
+
+    ctx.fillStyle='rgba(239,68,68,0.65)';ctx.fillText('⚠ BREACH ZONE',mid35,top+14);
+    ctx.fillStyle='rgba(91,164,245,0.85)';ctx.fillText('✦ TWIN WIN ZONE',mid0,top+14);
+    ctx.fillStyle='rgba(34,197,94,0.65)';ctx.fillText('📈 BULL ZONE',midBull,top+14);
+
+    // Barrier label
+    ctx.fillStyle='rgba(239,68,68,0.7)';ctx.textAlign='left';ctx.font='11px Segoe UI';
+    ctx.fillText('Barrier −35%',p35+4,top+28);
+
+    ctx.restore();
+  }
+};
+
+/* Scenario point markers plugin */
+let scenarioPoints=[];
+const pointsPlugin={
+  id:'scenPts',
+  afterDatasetsDraw(chart){
+    if(!scenarioPoints.length)return;
+    const{ctx,scales:{x,y}}=chart;
+    ctx.save();
+    scenarioPoints.forEach(pt=>{
+      const px=x.getPixelForValue(pt.x);
+      const py=y.getPixelForValue(pt.y);
+      // Vertical line
+      ctx.strokeStyle=pt.color+'88';ctx.lineWidth=1;ctx.setLineDash([4,3]);
+      ctx.beginPath();ctx.moveTo(px,chart.chartArea.bottom);ctx.lineTo(px,py);ctx.stroke();
+      ctx.setLineDash([]);
+      // Dot
+      ctx.beginPath();ctx.arc(px,py,7,0,Math.PI*2);
+      ctx.fillStyle=pt.color;ctx.fill();
+      ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+      // Label box
+      const lw=ctx.measureText(pt.label).width+14;
+      const lx=px-(lw/2);const ly=py-32;
+      ctx.fillStyle='rgba(6,12,24,0.92)';
+      ctx.strokeStyle=pt.color;ctx.lineWidth=1;
+      ctx.beginPath();ctx.roundRect(lx,ly,lw,20,4);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#fff';ctx.font='bold 10px Segoe UI';ctx.textAlign='center';
+      ctx.fillText(pt.label,px,ly+13);
+    });
+    ctx.restore();
+  }
+};
+
+function buildDatasets(){
+  // Dataset 1: Breach zone (red dashed) — left of barrier
+  const breachData=[];
+  for(let xi=-65;xi<=-35;xi++)breachData.push({x:xi,y:xi});
+
+  // Dataset 2: Twin Win + Bull zone — mirrored negative then direct positive
+  const twData=[];
+  for(let xi=-35;xi<=65;xi+=0.5)twData.push({x:xi,y:xi<0?-xi:xi});
+
+  // Dataset 3: 1:1 benchmark (dashed)
+  const benchData=[];
+  for(let xi=-65;xi<=65;xi++)benchData.push({x:xi,y:xi});
+
+  return[
+    {
+      label:'Twin Win Payoff',
+      data:twData,
+      borderColor:'#2e7de9',
+      backgroundColor:'rgba(46,125,233,0.0)',
+      borderWidth:3,
+      fill:false,
+      tension:0,
+      pointRadius:0,
+      order:1,
+    },
+    {
+      label:'Breach Zone (direct loss)',
+      data:breachData,
+      borderColor:'#ef4444',
+      borderWidth:2.5,
+      borderDash:[5,4],
+      fill:false,
+      tension:0,
+      pointRadius:0,
+      order:2,
+    },
+    {
+      label:'1:1 Index Benchmark',
+      data:benchData,
+      borderColor:'rgba(255,255,255,0.25)',
+      borderWidth:1.2,
+      borderDash:[6,4],
+      fill:false,
+      tension:0,
+      pointRadius:0,
+      order:3,
+    }
+  ];
+}
+
+const scenarioInfo={
+  all:{icon:'',title:'',desc:'',pts:[]},
+  bull:{
+    icon:'📈',
+    title:'Bull Market — Standard Upside Participation',
+    desc:'When the index finishes above its initial level, the Twin Win behaves like a simple index tracker: the investor captures 100% of the gain. Example: +20% index → +20% product return. There is no cap on the upside — the full gain is passed through.',
+    pts:[
+      {x:15,y:15,label:'+15% → +15%',color:'#22c55e'},
+      {x:30,y:30,label:'+30% → +30%',color:'#22c55e'},
+    ],
+  },
+  bear:{
+    icon:'📉',
+    title:'Bear Market (Twin Win Zone) — Reading the Chart',
+    desc:'⚠️ KEY: The X-axis goes from −65% (left) to +65% (right). In the Twin Win zone, as X moves LEFT (market falls more), the product return increases. Example: −10% index → +10% product; −20% → +20%; −30% → +30%. The line slopes DOWN left-to-right because it represents LESS-negative underlying (toward 0%), thus LESS twin win gain.',
+    pts:[
+      {x:-10,y:10,label:'−10% → +10%',color:'#5ba4f5'},
+      {x:-20,y:20,label:'−20% → +20%',color:'#5ba4f5'},
+      {x:-30,y:30,label:'−30% → +30%',color:'#5ba4f5'},
+    ],
+  },
+  breach:{
+    icon:'⚠️',
+    title:'Barrier Breach — European Barrier at −35%',
+    desc:'If the index closes BELOW −35% at maturity, the barrier is breached. The Twin Win and capital protection both disappear. The investor participates 1:1 in the index loss — exactly as if they held the index directly. Example: −45% index → −45% product return. Note: the barrier is only checked at final maturity (European), not daily.',
+    pts:[
+      {x:-45,y:-45,label:'−45% → −45%',color:'#ef4444'},
+      {x:-55,y:-55,label:'−55% → −55%',color:'#ef4444'},
+    ],
+  },
+  flat:{
+    icon:'➡️',
+    title:'Flat Market — Capital Returned at Par',
+    desc:'If the Euro Stoxx 50 closes exactly at its initial level (0% return), the investor receives their full capital back — no gain, no loss. This is the "worst non-breach" scenario: opportunity cost vs. holding cash (missed dividends, inflation erosion), but full principal preserved.',
+    pts:[
+      {x:0,y:0,label:'0% → 0% (par)',color:'#8899aa'},
+    ],
+  },
+};
+
+let curScen='all';
+
+function setScenario(key,btn){
+  document.querySelectorAll('.scb').forEach(b=>{b.classList.remove('on','on-red','on-green')});
+  if(key==='breach')btn.classList.add('on-red');
+  else if(key==='bull')btn.classList.add('on-green');
+  else btn.classList.add('on');
+
+  curScen=key;
+  const info=scenarioInfo[key];
+  const seBox=document.getElementById('se-box');
+  if(key==='all'||!info.title){
+    seBox.style.display='none';
+  } else {
+    seBox.style.display='flex';
+    document.getElementById('se-ico').textContent=info.icon;
+    document.getElementById('se-t').textContent=info.title;
+    document.getElementById('se-d').innerHTML=info.desc;
+  }
+  scenarioPoints=info.pts||[];
+  if(chartInst)chartInst.update('none');
+}
+
+function initChart(){
+  if(chartInst)return;
+  const canvas=document.getElementById('payoffChart');
+  chartInst=new Chart(canvas,{
+    type:'line',
+    data:{datasets:buildDatasets()},
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      parsing:false,
+      animation:{duration:800,easing:'easeOutQuart'},
+      plugins:{
+        legend:{
+          display:true,
+          position:'top',
+          align:'end',
+          labels:{
+            color:'rgba(255,255,255,0.55)',
+            font:{size:11},
+            boxWidth:22,
+            padding:14,
+            usePointStyle:true,
+            pointStyle:'line',
+          }
+        },
+        tooltip:{
+          callbacks:{
+            title:items=>`Index: ${items[0].parsed.x.toFixed(1)}%`,
+            label:item=>{
+              const xv=item.parsed.x;
+              const yv=item.parsed.y;
+              const zone=xv<-35?'⚠️ Breach':(xv<0?'✦ Twin Win':'📈 Bull');
+              return ` ${item.dataset.label}: ${yv>=0?'+':''}${yv.toFixed(1)}%   [${zone}]`;
+            }
+          },
+          backgroundColor:'rgba(4,9,18,0.95)',
+          titleColor:'#fff',
+          bodyColor:'rgba(255,255,255,0.75)',
+          borderColor:'rgba(255,255,255,0.12)',
+          borderWidth:1,
+          padding:10,
+        }
+      },
+      scales:{
+        x:{
+          type:'linear',min:-65,max:65,
+          title:{display:true,text:'Euro Stoxx 50® Return at Maturity (%)',color:'rgba(255,255,255,0.45)',font:{size:11}},
+          ticks:{color:'rgba(255,255,255,0.45)',callback:v=>v+'%',stepSize:10},
+          grid:{color:'rgba(255,255,255,0.05)'},
+        },
+        y:{
+          min:-70,max:75,
+          title:{display:true,text:'Product Return (%)',color:'rgba(255,255,255,0.45)',font:{size:11}},
+          ticks:{color:'rgba(255,255,255,0.45)',callback:v=>(v>=0?'+':'')+v+'%',stepSize:10},
+          grid:{color:'rgba(255,255,255,0.05)'},
+        }
+      }
+    },
+    plugins:[zonesPlugin,pointsPlugin],
+  });
+}
+
+/* ═══════════════════ PROGRESS BARS (slide 8) ═══════════════════ */
+function animateBars(){
+  document.querySelectorAll('.pbf').forEach(el=>{
+    const w=el.getAttribute('data-w');
+    if(w){el.style.width='0';requestAnimationFrame(()=>{el.style.width=w+'%'});}
+  });
+}
+
+/* ═══════════════════ SLIDE CHANGE OBSERVER ═══════════════════ */
+const slideObs=new MutationObserver(muts=>{
+  muts.forEach(m=>{
+    if(m.target.classList.contains('active')){
+      const idx=Array.from(slides).indexOf(m.target);
+      if(idx===7)setTimeout(initPricer,150);
+    }
+  });
+});
+slides.forEach(s=>slideObs.observe(s,{attributes:true,attributeFilter:['class']}));
+
+/* ═══════════════════ BLACK-SCHOLES PRICER ═══════════════════ */
+
+// Standard normal CDF — Abramowitz & Stegun approximation (error < 1.5e-7)
+function Φ(x){
+  const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+  const s=x<0?-1:1;const t=1/(1+p*Math.abs(x));
+  return 0.5*(1+s*(1-((((a5*t+a4)*t+a3)*t+a2)*t+a1)*t*Math.exp(-x*x)));
+}
+function bsCall(S,K,r,q,σ,T){
+  if(T<=0)return Math.max(0,S*Math.exp(-q*T)-K*Math.exp(-r*T));
+  const sq=σ*Math.sqrt(T);
+  const d1=(Math.log(S/K)+(r-q+σ*σ/2)*T)/sq;
+  return S*Math.exp(-q*T)*Φ(d1)-K*Math.exp(-r*T)*Φ(d1-sq);
+}
+function bsPut(S,K,r,q,σ,T){
+  if(T<=0)return Math.max(0,K*Math.exp(-r*T)-S*Math.exp(-q*T));
+  const sq=σ*Math.sqrt(T);
+  const d1=(Math.log(S/K)+(r-q+σ*σ/2)*T)/sq;
+  return K*Math.exp(-r*T)*Φ(-(d1-sq))-S*Math.exp(-q*T)*Φ(-d1);
+}
+// Risk-neutral probability that S_T < B*S_0 (breach probability under Q)
+function breachProb(B,r,q,σ,T){
+  const d2=(Math.log(B)+(r-q-σ*σ/2)*T)/(σ*Math.sqrt(T));
+  return Φ(d2)*100;
+}
+
+// Update range slider fill gradient
+function sliderFill(id,min,max,val){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const pct=(val-min)/(max-min)*100;
+  el.style.background=`linear-gradient(to right,var(--accent) ${pct}%,rgba(255,255,255,0.12) ${pct}%)`;
+}
+
+/* ═══════════════════ WATERFALL BRIDGE CHART ═══════════════════ */
+let waterfallChart=null;
+
+function buildWaterfall(zcb, straddle, put_otm, pvDiv, margin){
+  const canvas=document.getElementById('pr-waterfall');
+  if(!canvas)return;
+
+  // Running totals for floating bars [bottom, top]
+  const budget=100+pvDiv;
+  const afterZcb=budget-zcb;
+  const afterStr=afterZcb-straddle;
+  const afterPut=afterStr+put_otm; // = margin
+
+  const mCol=margin>1.5?'rgba(34,197,94,0.85)':margin>0?'rgba(201,168,76,0.85)':'rgba(220,53,69,0.75)';
+  const mBdr=margin>1.5?'rgba(34,197,94,1)':margin>0?'rgba(201,168,76,1)':'rgba(220,53,69,1)';
+
+  const newData=[
+    [0,100],
+    [100,budget],
+    [afterZcb,budget],
+    [afterStr,afterZcb],
+    [afterStr,afterPut],
+    [0,margin]
+  ];
+  const newBg=[
+    'rgba(255,255,255,0.12)',
+    'rgba(20,184,166,0.75)',
+    'rgba(37,99,235,0.82)',
+    'rgba(201,168,76,0.82)',
+    'rgba(34,197,94,0.82)',
+    mCol
+  ];
+  const newBdr=['rgba(255,255,255,0.3)','rgba(20,184,166,1)','rgba(91,164,245,1)','rgba(201,168,76,1)','rgba(34,197,94,1)',mBdr];
+
+  // Delta labels shown above each bar
+  const deltas=[
+    '+100€',
+    '+'+pvDiv.toFixed(1)+'€',
+    '−'+zcb.toFixed(1)+'€',
+    '−'+straddle.toFixed(1)+'€',
+    '+'+put_otm.toFixed(1)+'€',
+    (margin>=0?'+':'')+margin.toFixed(1)+'€'
+  ];
+
+  // Custom plugin: draw € value above each bar (reads live labels from chart._wfDeltas)
+  const labelsPlugin={
+    id:'wfLbls',
+    afterDatasetsDraw(chart){
+      const ctx=chart.ctx;
+      const meta=chart.getDatasetMeta(0);
+      const lbls=chart._wfDeltas||[];
+      chart.data.datasets[0].data.forEach(([lo,hi],i)=>{
+        const bar=meta.data[i];
+        if(!bar||!lbls[i])return;
+        const topY=chart.scales.y.getPixelForValue(Math.max(lo,hi));
+        const labelY=topY-6;
+        ctx.save();
+        ctx.font='bold 10px Inter,system-ui,sans-serif';
+        ctx.fillStyle='rgba(255,255,255,0.92)';
+        ctx.textAlign='center';
+        ctx.fillText(lbls[i],bar.x,labelY);
+        ctx.restore();
+      });
+    }
+  };
+
+  const yMax=Math.ceil(Math.max(budget,105)/5)*5+5;
+  const yMin=Math.min(0,Math.floor(margin/5)*5-5);
+
+  if(waterfallChart){
+    waterfallChart.data.datasets[0].data=newData;
+    waterfallChart.data.datasets[0].backgroundColor=newBg;
+    waterfallChart.data.datasets[0].borderColor=newBdr;
+    // Regenerate the closure with fresh deltas
+    waterfallChart._wfDeltas=deltas;
+    waterfallChart.options.scales.y.min=yMin;
+    waterfallChart.options.scales.y.max=yMax;
+    waterfallChart.update('active');
+    return;
+  }
+
+  const ctx2d=canvas.getContext('2d');
+  waterfallChart=new Chart(ctx2d,{
+    type:'bar',
+    data:{
+      labels:[['€100','Notional'],['Dividends','Funding'],['① Zero-Coupon','Bond cost'],['② At-the-Money','Straddle cost'],['③ OTM Put','Premium rec.'],['=','Margin']],
+      datasets:[{
+        data:newData,
+        backgroundColor:newBg,
+        borderColor:newBdr,
+        borderWidth:1,
+        borderRadius:4,
+        borderSkipped:false
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            title:c=>c[0].label.join(' '),
+            label:c=>{
+              const [lo,hi]=c.raw;
+              const d=hi-lo;
+              return (d>=0?'+':'')+d.toFixed(2)+'€';
+            }
+          }
+        }
+      },
+      scales:{
+        y:{
+          min:yMin, max:yMax,
+          ticks:{color:'rgba(255,255,255,0.4)',font:{size:9},callback:v=>v+'€'},
+          grid:{color:'rgba(255,255,255,0.05)'},
+          border:{color:'rgba(255,255,255,0.1)'}
+        },
+        x:{
+          ticks:{color:'rgba(255,255,255,0.68)',font:{size:9.5},maxRotation:0},
+          grid:{display:false},
+          border:{color:'rgba(255,255,255,0.1)'}
+        }
+      },
+      animation:{duration:600,easing:'easeInOutQuart'}
+    },
+    plugins:[labelsPlugin]
+  });
+  waterfallChart._wfDeltas=deltas;
+}
+
+/* ═══════════════════ SLIDE ENTRY ANIMATIONS ═══════════════════ */
+function animateSlide(idx){
+  if(idx===0)return; // Intro slide has its own particle animation
+  const slide=slides[idx];
+  if(!slide)return;
+  const targets=[...slide.querySelectorAll('.c,.mtile,.fm,.g2>div,.g4>div')];
+  if(!targets.length)return;
+  // Reset
+  targets.forEach(el=>{
+    el.style.opacity='0';
+    el.style.transform='translateY(20px)';
+    el.style.transition='none';
+  });
+  // Trigger after 2 frames so the reset is painted first
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    targets.forEach((el,i)=>{
+      const d=(0.04+i*0.09).toFixed(2)+'s';
+      el.style.transition=`opacity 0.5s ease ${d}, transform 0.5s ease ${d}`;
+      el.style.opacity='1';
+      el.style.transform='translateY(0)';
+    });
+  }));
+}
+
+let pricerInited=false;
+function updatePricer(){
+  const r  =+document.getElementById('pr-r').value/100;
+  const q  =+document.getElementById('pr-q').value/100;
+  const σ  =+document.getElementById('pr-sigma').value/100;
+  const T  =+document.getElementById('pr-T').value;
+  const B  =+document.getElementById('pr-B').value/100;
+  const sk =+document.getElementById('pr-sk').value/100;  // e.g. -0.03
+
+  // Live labels
+  const fmt=(v,d,s)=>v.toFixed(d)+s;
+  document.getElementById('pr-r-val').textContent   = fmt(r*100,1,'%');
+  document.getElementById('pr-q-val').textContent   = fmt(q*100,1,'%');
+  document.getElementById('pr-sigma-val').textContent= fmt(σ*100,1,'%');
+  document.getElementById('pr-T-val').textContent   = fmt(T,1,' Y');
+  document.getElementById('pr-B-val').textContent   = fmt(B*100,0,'%');
+  document.getElementById('pr-sk-val').textContent  = (sk*100).toFixed(1)+'%';
+
+  // Update slider tracks
+  sliderFill('pr-r',    0.5,  6,   r*100);
+  sliderFill('pr-q',    1,    6,   q*100);
+  sliderFill('pr-sigma',10,   40,  σ*100);
+  sliderFill('pr-T',    1,    7,   T);
+  sliderFill('pr-B',    50,   85,  B*100);
+  sliderFill('pr-sk',   -8,   0,   sk*100);
+
+  const S=100;
+
+  // ① ZCB cost: PV of 100 at risk-free rate over T years
+  const zcb=100*Math.exp(-r*T);
+
+  // ② ATM Straddle: long call + long put (K = S₀)
+  // Dividend yield q lowers the forward → options are cheaper
+  const call=bsCall(S,S,r,q,σ,T);
+  const put =bsPut (S,S,r,q,σ,T);
+  const straddle=call+put;
+
+  // ③ Short OTM Put (K = B·S₀): vol adjusted for skew
+  // Skew correction: puts at lower strikes trade at higher implied vol
+  // Simple linear skew: Δσ = |skew| × (moneyness gap / 25Δ reference)
+  const moneynessGap=1-B; // e.g. 0.35 for B=0.65
+  const skewCorr=Math.abs(sk)*moneynessGap/0.25*0.6;
+  const σ_otm=Math.min(σ+skewCorr, σ*2.5); // cap at 2.5× ATM vol
+  const put_otm=bsPut(S,B*S,r,q,σ_otm,T);
+
+  // ④ PV of foregone dividends — retained by the bank from its delta hedge
+  // The investor gives up dividends; the bank keeps them. This is the KEY funding source.
+  const pvDiv = S*(1-Math.exp(-q*T));
+
+  // Correct margin: bank receives €100 notional + pvDiv from dividends,
+  // then pays for ZCB and net options (Straddle − OTM Put premium received).
+  const margin = 100 + pvDiv - zcb - straddle + put_otm;
+
+  // Derived metrics
+  const fwd=S*Math.exp((r-q)*T);
+  const bProb=breachProb(B,r,q,σ,T);
+
+  // ── Waterfall bridge chart ──
+  buildWaterfall(zcb, straddle, put_otm, pvDiv, margin);
+
+  // ── Margin indicator ──
+  const mb =document.getElementById('pr-mbox');
+  const mv =document.getElementById('pr-margin-val');
+  const ms =document.getElementById('pr-margin-sub');
+  const mic=document.getElementById('pr-margin-ico');
+  if(mb&&mv&&ms&&mic){
+    const cls=margin>1.5?'ok':margin>0?'warn':'bad';
+    mb.className='mbox '+cls;
+    mv.textContent=(margin>=0?'+':'')+margin.toFixed(2)+'€';
+    mv.style.color=margin>1.5?'var(--green)':margin>0?'var(--gold)':'var(--red)';
+    ms.textContent=margin>1.5?'Viable — sell the product ✓':margin>0?'Break-even — adjust params ⚠':'Not viable at these params ✗';
+    mic.textContent=margin>1.5?'✅':margin>0?'⚠️':'❌';
+  }
+
+  // ── Small metric tiles ──
+  const tile=(id,val)=>{const e=document.getElementById(id);if(e)e.textContent=val};
+  tile('mt-pvdiv', '+'+pvDiv.toFixed(1)+'€');
+  tile('mt-bp',    bProb.toFixed(1)+'%');
+}
+
+function initPricer(){
+  if(pricerInited){updatePricer();return;}
+  pricerInited=true;
+  ['pr-r','pr-q','pr-sigma','pr-T','pr-B','pr-sk'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener('input',updatePricer);
+  });
+  updatePricer();
+}
+
+function resetPricer(){
+  const defaults={
+    'pr-r':   3.2,
+    'pr-q':   3.3,
+    'pr-sigma':18,
+    'pr-T':   5,
+    'pr-B':   65,
+    'pr-sk':  -3
+  };
+  Object.entries(defaults).forEach(([id,val])=>{
+    const el=document.getElementById(id);
+    if(el) el.value=val;
+  });
+  updatePricer();
+  /* Brief visual flash on reset button */
+  const btn=document.getElementById('btn-reset');
+  if(btn){
+    btn.textContent='✓ Reset!';
+    btn.style.color='var(--green)';
+    btn.style.borderColor='var(--green)';
+    setTimeout(()=>{ btn.textContent='↺ Reset to product defaults'; btn.style.color=''; btn.style.borderColor=''; },1200);
+  }
+}
+</script>
+<script>
+// ── QR Code auto-généré depuis l'URL de la page (fonctionnel une fois déployé) ──
+var _qrUrl = '';
+(function(){
+  var img = document.getElementById('qr-code');
+  if (!img) return;
+  _qrUrl = window.location.href.split('#')[0].split('?')[0];
+  img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&color=060d1a&bgcolor=ffffff&qzone=1&data=' + encodeURIComponent(_qrUrl);
+})();
+
+function openQrModal(){
+  var modal = document.getElementById('qr-modal');
+  var modalImg = document.getElementById('qr-modal-img');
+  var urlEl = document.getElementById('qr-modal-url');
+  if (!modal) return;
+  if (modalImg && !modalImg.src.includes('qrserver')) {
+    modalImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=600x600&color=060d1a&bgcolor=ffffff&qzone=2&data=' + encodeURIComponent(_qrUrl);
+  }
+  if (urlEl) urlEl.textContent = _qrUrl;
+  modal.classList.add('open');
+}
+function closeQrModal(){
+  var modal = document.getElementById('qr-modal');
+  if(modal){ modal.classList.remove('open'); }
+}
+</script>
+
+<!-- QR Modal overlay -->
+<div id="qr-modal" onclick="closeQrModal()">
+  <div id="qr-modal-inner">
+    <img id="qr-modal-img" src="" alt="QR Code agrandi" />
+    <div id="qr-modal-url"></div>
+    <div id="qr-modal-close">Cliquer n'importe où pour fermer</div>
+  </div>
+</div>
+</body>
+</html>
