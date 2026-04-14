@@ -98,12 +98,12 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,-apple-sy
   padding:42px 50px 32px;
   overflow-y:auto;
   display:flex;flex-direction:column;
-  opacity:0;
-  transition:opacity 0.32s ease;
+  opacity:0;transform:translateY(22px);
+  transition:opacity 0.42s cubic-bezier(.4,0,.2,1),transform 0.42s cubic-bezier(.4,0,.2,1);
   pointer-events:none;
 }
-.slide.active{opacity:1;pointer-events:all}
-.slide.prev{opacity:0;}
+.slide.active{opacity:1;transform:translateY(0);pointer-events:all}
+.slide.prev{opacity:0;transform:translateY(-22px)}
 .slide::-webkit-scrollbar{width:3px}
 .slide::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
@@ -244,144 +244,43 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
 
 .ac{opacity:0;transform:translateY(13px)}
-.slide.active:not(.visited) .ac{animation:fadeUp .5s ease forwards}
-.slide.active:not(.visited) .ac:nth-child(1){animation-delay:.12s}
-.slide.active:not(.visited) .ac:nth-child(2){animation-delay:.22s}
-.slide.active:not(.visited) .ac:nth-child(3){animation-delay:.32s}
-.slide.active:not(.visited) .ac:nth-child(4){animation-delay:.42s}
-.slide.active:not(.visited) .ac:nth-child(5){animation-delay:.52s}
-.slide.active:not(.visited) .ac:nth-child(6){animation-delay:.58s}
-.slide.visited .ac{opacity:1;transform:translateY(0)}
+.slide.active .ac{animation:fadeUp .5s ease forwards}
+.slide.active .ac:nth-child(1){animation-delay:.12s}
+.slide.active .ac:nth-child(2){animation-delay:.22s}
+.slide.active .ac:nth-child(3){animation-delay:.32s}
+.slide.active .ac:nth-child(4){animation-delay:.42s}
+.slide.active .ac:nth-child(5){animation-delay:.52s}
+.slide.active .ac:nth-child(6){animation-delay:.58s}
 
 /* ── hint ── */
 .hint{position:fixed;bottom:18px;right:18px;display:flex;gap:5px;z-index:200;opacity:.35}
 .hint span{width:24px;height:24px;border:1px solid rgba(255,255,255,.3);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;background:rgba(255,255,255,.04)}
 
-@media(max-width:780px){
-  :root{--sw:0px}
-  #sidebar{display:none}
-  .slide{padding:20px 16px 80px}
-  .intro-wrap{padding:32px 20px}
-  .intro-ht{font-size:clamp(28px,8vw,48px)}
-  .intro-stats{gap:16px}
-  .intro-qr{display:none}
-
-  /* ── Grilles classes → colonne unique ── */
-  .g2,.g3,.g4{grid-template-columns:1fr !important}
-
-  /* ── Tous les grid inline → colonne unique ── */
-  #main [style*="grid-template-columns"]{
-    grid-template-columns:1fr !important;
-    overflow:visible !important;
-  }
-
-  /* ── Charts : hauteur lisible ── */
-  .chart-wrap{min-height:240px !important;max-height:280px !important}
-  #s3 .chart-wrap{min-height:220px !important;max-height:260px !important}
-
-  /* ── Slide S4 — hero persona : empiler les stats ── */
-  #s4 .ac:first-of-type > div:last-child{
-    flex-direction:column !important;
-    gap:6px !important;
-    flex-shrink:1 !important;
-  }
-  #s4 .ac:first-of-type{
-    flex-wrap:wrap !important;
-    gap:12px !important;
-  }
-
-  /* ── Slide S8 Pricing : layout vertical ── */
-  #s8 .inner{overflow-y:auto !important;padding-bottom:20px}
-  #pricer-layout{
-    display:flex !important;
-    flex-direction:column !important;
-    overflow:visible !important;
-    min-height:unset !important;
-    height:auto !important;
-  }
-  #s8 [style*="overflow:hidden"]{overflow:visible !important}
-
-  /* ── Pricer bottom metrics : 3 → 1 col ── */
-  #s8 [style*="1.7fr"]{
-    grid-template-columns:1fr !important;
-  }
-
-  /* ── Scenario box (s3) ── */
-  .se-box{font-size:12px !important}
-
-  /* ── Flow diagram (s7) : wrap ── */
-  .flow{flex-wrap:wrap !important;gap:8px !important;justify-content:flex-start !important}
-  .fnode{min-width:80px !important;font-size:10px !important}
-
-  /* ── Textes adaptés ── */
-  .sh{font-size:clamp(18px,4.5vw,26px) !important}
-  .c{padding:12px !important}
-  .mtile{padding:12px !important}
-
-  /* ── inner : ne pas bloquer le scroll ── */
-  .inner{overflow-y:auto !important;overflow-x:hidden}
-  .slide{overflow-y:auto !important}
-}
-
-/* ── Mobile hamburger button ── */
-#mob-burger{
-  display:none;
-  position:fixed;top:14px;right:14px;z-index:500;
-  width:42px;height:42px;border-radius:10px;
-  background:rgba(10,22,40,0.92);
-  border:1px solid rgba(255,255,255,0.12);
-  backdrop-filter:blur(12px);
-  align-items:center;justify-content:center;
-  flex-direction:column;gap:5px;cursor:pointer;
-  box-shadow:0 4px 20px rgba(0,0,0,0.4);
-  transition:background 0.2s;
-}
-#mob-burger:hover{background:rgba(46,125,233,0.2)}
-#mob-burger span{
-  display:block;width:18px;height:2px;
-  background:#fff;border-radius:2px;
-  transition:transform 0.25s, opacity 0.25s;
-}
-#mob-burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
-#mob-burger.open span:nth-child(2){opacity:0}
-#mob-burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
-
-/* ── Mobile nav overlay ── */
-#mob-nav{
-  display:none;position:fixed;inset:0;z-index:490;
-  background:rgba(6,13,26,0.97);
-  backdrop-filter:blur(16px);
-  flex-direction:column;
-  padding:80px 28px 40px;
-  overflow-y:auto;
-}
-#mob-nav.open{display:flex;animation:qrFadeIn .22s ease}
-.mob-nav-title{
-  font-size:10px;font-weight:700;letter-spacing:3px;
-  color:var(--gold);text-transform:uppercase;margin-bottom:20px;
-}
-.mob-ni{
-  display:flex;align-items:center;gap:14px;
-  padding:14px 16px;border-radius:10px;cursor:pointer;
-  border:1px solid transparent;margin-bottom:6px;
-  transition:background 0.18s, border-color 0.18s;
-}
-.mob-ni:hover,.mob-ni.active{
-  background:rgba(46,125,233,0.12);
-  border-color:rgba(46,125,233,0.25);
-}
-.mob-ni.active .mob-nl{color:#fff}
-.mob-nn{font-size:10px;font-weight:700;color:rgba(255,255,255,0.2);width:22px;flex-shrink:0}
-.mob-ico{font-size:16px;width:24px;text-align:center;flex-shrink:0}
-.mob-nl{font-size:14px;font-weight:600;color:rgba(255,255,255,0.7)}
-.mob-counter{
-  margin-top:auto;padding-top:24px;
-  font-size:10px;color:var(--gray);letter-spacing:2px;
-  text-transform:uppercase;
-}
-/* Mobile swipe hint */
-@media(max-width:780px){
-  #mob-burger{display:flex}
+@media(max-width:780px){:root{--sw:0px}#sidebar{display:none}.slide{padding:22px 18px}.intro-wrap{padding:36px 22px}}
+/* ── Mobile layout: collapse multi-column grids to single/double column ── */
+@media(max-width:640px){
+  .slide{padding:18px 14px 28px;overflow-y:auto}
+  .g2,.g3{grid-template-columns:1fr !important}
+  .g4{grid-template-columns:1fr 1fr !important}
+  /* Override inline grid-template-columns on nested divs */
+  div[style*="grid-template-columns:1fr 1fr 1fr"]{grid-template-columns:1fr !important}
+  div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important}
+  div[style*="grid-template-columns:285px 1fr"]{grid-template-columns:1fr !important}
+  div[style*="grid-template-columns:1.7fr 1fr 1fr"]{grid-template-columns:1fr !important}
+  div[style*="grid-template-columns:1.6fr 1fr 1fr"]{grid-template-columns:1fr !important}
+  div[style*="grid-template-columns:1fr auto 1fr"]{grid-template-columns:1fr !important}
+  div[style*="grid-template-columns:repeat(4,1fr)"]{grid-template-columns:1fr 1fr !important}
+  div[style*="grid-template-columns:repeat(5,1fr) auto"]{grid-template-columns:1fr 1fr !important}
+  /* Pricer: make sliders panel not scroll separately on mobile */
+  #s8 [style*="overflow-y:auto"]{overflow-y:visible !important;max-height:none !important}
+  /* Reduce big number tiles */
+  .bn{font-size:48px}
+  /* Slide titles slightly smaller */
+  .ey{font-size:11px;letter-spacing:2px}
+  .sh{font-size:20px}
+  h3{font-size:14px}
+  /* Tighten blobs */
+  .blob{filter:blur(60px)}
 }
 
 /* ── Logo animation ── */
@@ -708,7 +607,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="div" style="margin-bottom:18px"></div>
 
     <!-- Hero investor persona -->
-    <div class="ac" style="display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,rgba(91,164,245,0.12),rgba(46,125,233,0.06));border:1px solid rgba(91,164,245,0.28);border-radius:14px;padding:16px 22px;margin-bottom:18px">
+    <div style="display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,rgba(91,164,245,0.12),rgba(46,125,233,0.06));border:1px solid rgba(91,164,245,0.28);border-radius:14px;padding:16px 22px;margin-bottom:18px">
       <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;box-shadow:0 0 20px rgba(91,164,245,0.35)">👤</div>
       <div style="flex:1">
         <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px">The Wealth Preservation Seeker</div>
@@ -731,7 +630,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     </div>
 
     <!-- 4 key traits -->
-    <div class="ac" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
 
       <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:16px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(91,164,245,0.45)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.09)'">
         <div style="font-size:26px">🧭</div>
@@ -754,12 +653,12 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:16px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(201,168,76,0.45)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.09)'">
         <div style="font-size:26px">⚠️</div>
         <div style="font-size:13px;font-weight:800;color:#fff">Known Worst Case</div>
-        <div style="font-size:11.5px;color:rgba(255,255,255,0.55);line-height:1.45">Accepts defined tail risk: if index crashes &gt;35%, capital protection disappears. Risk is bounded and disclosed.</div>
+        <div style="font-size:11.5px;color:rgba(255,255,255,0.55);line-height:1.45">Accepts defined tail risk: if index crashes &gt;35% at maturity (European barrier), the Down-and-Out Put is knocked out and capital is no longer protected. Risk is bounded and fully disclosed upfront.</div>
       </div>
     </div>
 
     <!-- Bottom: Segments + Not recommended -->
-    <div class="ac" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
 
       <!-- Investor segments -->
       <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px">
@@ -812,7 +711,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="g3 mb">
       <div class="c bl ac">
         <h3>🌍 Deep Derivatives Market</h3>
-        <p>The Euro Stoxx 50 options market (Eurex) is one of the most liquid in the world. Tight bid-ask spreads on calls, puts and barrier options are critical: they allow the structuring desk to buy the ATM straddle and sell the OTM put at competitive prices, resulting in better payoff terms for the client.</p>
+        <p>The Euro Stoxx 50 options market (Eurex) is one of the most liquid in the world. Tight bid-ask spreads on calls, puts and barrier options are critical: they allow the structuring desk to buy the ATM Call and the Down-and-Out ATM Put at competitive prices, resulting in better payoff terms for the client.</p>
       </div>
       <div class="c go ac">
         <h3>💹 High Dividend Yield — The Funding Engine</h3>
@@ -820,7 +719,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       </div>
       <div class="c gr ac">
         <h3>📊 Rich Implied Volatility &amp; Skew</h3>
-        <p>The SX5E consistently trades with elevated implied volatility and a pronounced downside skew (put options are relatively expensive vs. calls). This benefits the structure: the short OTM put (sold at 65%) commands a richer premium due to the skew, reducing the net cost of the strategy and improving product terms.</p>
+        <p>The SX5E consistently trades with elevated implied volatility and a pronounced <strong>downside skew</strong> — downside strikes carry a higher implied volatility than at-the-money strikes. This benefits the structure: the Down-and-Out Put's Down-and-In leg is priced using the higher 65%-strike vol, making the DI Put more expensive → the DOout Put itself (= Vanilla Put − DI Put) becomes cheaper → better margin for the bank and more attractive terms for the client.</p>
       </div>
       <div class="c ac">
         <h3>🔁 Mean-Reversion Tendency</h3>
@@ -828,7 +727,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       </div>
       <div class="c ac">
         <h3>🏛️ Regulatory Comfort &amp; Transparency</h3>
-        <p>European private clients and institutional investors are deeply familiar with the SX5E. It is PRIIPS-compliant, easily described in a KID document, and its composition (50 blue-chip Eurozone stocks) is fully transparent — no exoticism or opacity concerns when selling to regulated clients.</p>
+        <p>European private clients and institutional investors are deeply familiar with the SX5E. It is compliant with <strong>PRIIPS</strong> (the EU regulation on packaged retail investment products) and easily described in a <strong>KID</strong> (Key Information Document — the mandatory 3-page risk summary). Its composition (50 blue-chip Eurozone stocks) is fully transparent — no exoticism or opacity concerns when selling to regulated clients.</p>
       </div>
       <div class="c ac">
         <h3>📉 Diversification &amp; Stability</h3>
@@ -840,7 +739,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap">
         <div style="flex:1;min-width:200px">
           <h3 style="color:var(--gold)">The Dividend Yield: Why It Matters</h3>
-          <p style="font-size:12.5px;margin-top:6px">A higher dividend yield directly improves product terms. More foregone dividends → larger option budget → either <strong>higher participation rate</strong>, <strong>deeper barrier</strong>, or <strong>added features</strong>. The SX5E's ~3.3% yield over 5Y generates roughly €165 of option budget per €1,000 invested — sufficient to buy the ATM straddle after funding the zero-coupon bond and selling the OTM put.</p>
+          <p style="font-size:12.5px;margin-top:6px">A higher dividend yield directly improves product terms. More foregone dividends → larger option budget → either <strong>higher participation rate</strong>, <strong>deeper barrier</strong>, or <strong>added features</strong>. The SX5E's ~3.3% yield over 5Y generates roughly €165 of option budget per €1,000 invested — sufficient to fund the ATM Call and the Down-and-Out Put (exact) or the vanilla put spread approximation used in practice.</p>
         </div>
         <div style="text-align:center"><div class="bn go">3.3%</div><p style="font-size:11px;margin-top:4px">Annual div. yield<br>funds the option overlay</p></div>
         <div style="text-align:center"><div class="bn" style="color:var(--accent2)">~15%</div><p style="font-size:11px;margin-top:4px">Historical prob. of<br>5Y breach below −35%</p></div>
@@ -868,7 +767,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
         <div class="c go ac">
           <h3>3 Market Timing Arguments</h3>
           <ul class="bl" style="margin-top:8px">
-            <li><strong>Elevated implied volatility</strong> makes the straddle at the heart of the structure relatively valuable — in high-vol environments, structured products with embedded long vol positions offer better participation terms to clients.</li>
+            <li><strong>Elevated implied volatility</strong> makes the long option position at the heart of the structure (ATM Call + DOout ATM Put) more valuable — in high-vol environments, structured products with embedded long-vol positions offer better participation terms to clients.</li>
             <li><strong>Rate normalization</strong> — as central bank rates decline, the discount factor on the zero-coupon bond improves, freeing additional budget for the option overlay without increasing cost to the client.</li>
             <li><strong>Peak uncertainty</strong> — when neither a strong bull nor bear case is consensus, the Twin Win's direction-agnostic payoff is uniquely compelling vs. plain equity or pure fixed income.</li>
           </ul>
@@ -922,62 +821,119 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 
     <div class="g2 mb">
       <div style="display:flex;flex-direction:column;gap:12px">
+
+        <!-- Exact replication -->
         <div class="c bl ac">
-          <h3>Option Decomposition</h3>
-          <p style="font-size:12.5px;margin-bottom:10px">The Twin Win payoff can be replicated exactly by a portfolio of vanilla options. Understanding this decomposition is key to both pricing and hedging:</p>
+          <h3>Exact Replication — Barrier Options</h3>
+          <p style="font-size:12px;margin-bottom:10px;color:rgba(255,255,255,0.65)">The <em>theoretically correct</em> decomposition uses a barrier option. The mirror effect only exists when the barrier has <strong>not</strong> been breached — this is captured by a <strong>Down-and-Out Put</strong>:</p>
           <table>
             <tr><th>Component</th><th>Position</th><th>Role</th></tr>
-            <tr><td><strong>Zero-Coupon Bond</strong> (5Y)</td><td><span style="color:var(--green)">Long</span></td><td>Guarantees 100% capital return at maturity. Costs ~85% of notional at 3.2% rate.</td></tr>
-            <tr><td><strong>ATM Call</strong> (Strike = S₀)</td><td><span style="color:var(--green)">Long</span></td><td>Captures upside participation — pays if index rises above initial level.</td></tr>
-            <tr><td><strong>ATM Put</strong> (Strike = S₀)</td><td><span style="color:var(--green)">Long</span></td><td>Converts downside to positive — pays if index falls below initial level (the "mirror" effect).</td></tr>
-            <tr><td><strong>OTM Put</strong> (Strike = 65%×S₀)</td><td><span style="color:var(--red)">Short</span></td><td>Finances the structure and defines the barrier. Selling this put introduces the tail-risk exposure.</td></tr>
+            <tr><td><strong>Zero-Coupon Bond</strong> (5Y)</td><td><span style="color:var(--green)">Long</span></td><td>Guarantees 100% capital return at maturity regardless of market outcome.</td></tr>
+            <tr><td><strong>ATM Call</strong> (Strike = S₀)</td><td><span style="color:var(--green)">Long</span></td><td>Captures upside — pays if index finishes above initial level.</td></tr>
+            <tr><td><strong style="color:var(--accent2)">ATM Down-and-Out Put</strong><br><span style="font-size:9px;font-weight:400">(Strike = S₀, Barrier = 65%·S₀)</span></td><td><span style="color:var(--green)">Long</span></td><td>Generates the mirror effect <em>only if the barrier was never breached</em>. Knocked out (worthless) if index closes below 65%×S₀ at maturity → capital still protected by ZCB.</td></tr>
           </table>
         </div>
+
+        <!-- Exact formula + parity -->
         <div class="fm ac" style="opacity:1">
-          <div class="fl">Replication Identity</div>
-          <div style="margin-bottom:8px">Twin Win = ZCB + Call(S₀) + Put(S₀) − Put(65%·S₀)</div>
-          <div style="font-size:12px;color:var(--gray)">Straddle = Call(S₀) + Put(S₀) &nbsp;→&nbsp; profits from large moves in either direction</div>
+          <div class="fl">Exact Replication (Bouzoubaa, 2010)</div>
+          <div style="margin-bottom:6px;font-size:13.5px">Twin Win = ZCB + Call(S₀) + <span style="color:var(--accent2)">DOout Put(S₀, H=65%)</span></div>
+          <div style="font-size:10.5px;color:var(--gray);margin-bottom:6px">where DOout Put = Down-and-Out ATM Put — pays mirror effect only while barrier is intact</div>
+          <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:2px">
+            <div style="font-size:9.5px;color:rgba(255,255,255,0.45);margin-bottom:4px">▸ Parity (Bouzoubaa, p.175): &nbsp; <strong style="color:rgba(255,255,255,0.7)">Vanilla Put = Down-and-In Put + Down-and-Out Put</strong></div>
+            <div style="font-size:9.5px;color:rgba(255,255,255,0.45)">▸ <strong style="color:rgba(255,255,255,0.7)">Pricing</strong>: exact closed-form via the parity above — the DI Put has a Black-Scholes formula (Bouzoubaa p.175). This is what the pricer on Slide 8 uses.</div>
+          </div>
         </div>
       </div>
 
       <div style="display:flex;flex-direction:column;gap:12px">
+
+        <!-- Why DOout Put is affordable -->
         <div class="c go ac">
-          <h3>Funding Mechanism</h3>
-          <ul class="bl" style="margin-top:8px">
-            <li><strong>Zero-coupon bond costs ~85%</strong> of notional (at 3.2% risk-free rate over 5Y). This leaves ~15% of notional to fund the option overlay.</li>
-            <li><strong>Foregone dividends (~16–18% PV over 5Y)</strong> are the primary funding source for the straddle premium. The client does not receive index dividends — they are monetized by the bank to buy the options.</li>
-            <li><strong>Short OTM put (strike 65%) raises additional premium</strong> (~4–6% depending on vol skew) to bridge any funding gap. This is the "price" of the capital protection — the investor implicitly sells a deep put.</li>
-            <li><strong>Bank margin (~1%)</strong> is baked into the pricing and covers distribution costs, hedging friction, and CVA.</li>
-          </ul>
+          <h3>Why the DOout Put Makes the Structure Viable</h3>
+          <p style="font-size:12px;margin-bottom:10px;color:rgba(255,255,255,0.65)">The mirror effect requires a put option. But a vanilla ATM put on a 5Y structure is too expensive to fund. The solution: use a <strong>Down-and-Out Put</strong>, which is significantly cheaper.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <div style="background:rgba(220,53,69,0.1);border:1px solid rgba(220,53,69,0.2);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Vanilla ATM Put</div>
+              <div style="font-size:20px;font-weight:900;color:var(--red)">~€14</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:2px">Always pays mirror — too costly</div>
+            </div>
+            <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">DOout ATM Put (H=65%)</div>
+              <div style="font-size:20px;font-weight:900;color:var(--green)">~€3</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:2px">Mirror only above barrier — affordable</div>
+            </div>
+          </div>
+          <p style="font-size:11.5px;color:rgba(255,255,255,0.65)">The DOout Put costs roughly <strong>5× less</strong> than the vanilla put at default parameters: it accepts the risk of being knocked out below −35%, and that probability is significant over 5 years at ~18% vol. The investor takes on this tail risk; in exchange they get the mirror effect for free in moderate downturns — precisely the <em>raison d'être</em> of the Twin Win. Exact numbers depend on vol, rates, dividends and the barrier level — see the interactive pricer on the next slide.</p>
         </div>
+
+        <!-- Pricing note -->
         <div class="c re ac">
-          <h3>Why the Short OTM Put Creates the Barrier</h3>
-          <p style="font-size:12.5px;margin-top:6px">When the index finishes below 65% of its initial level, the short 65%-strike put is in the money by the amount of the decline. This exactly offsets the value of the long put (strike = S₀), which would otherwise have converted the loss to a gain. The net result: below −35%, the twin win and capital protection both disappear, and the investor bears the full loss — as if they owned the index directly.</p>
+          <h3>Pricing the DOout Put — Closed-Form Formula</h3>
+          <p style="font-size:12px;margin-top:6px">The Down-and-Out Put is priced analytically via the parity relation established by Bouzoubaa (2010, p.175):</p>
+          <div style="background:rgba(0,0,0,0.2);border-radius:7px;padding:9px 14px;margin:8px 0;font-size:12.5px;text-align:center">
+            <strong style="color:var(--accent2)">DOout Put = Vanilla Put − DI Put</strong>
+          </div>
+          <p style="font-size:11.5px;color:rgba(255,255,255,0.6)">Both legs have closed-form Black-Scholes solutions. The pricer on Slide 8 implements this parity directly — the DI Put formula (Bouzoubaa p.175) takes strike, barrier, vol, div yield, rate and maturity. <strong style="color:rgba(255,255,255,0.8)">Skew matters</strong>: the DI Put lives in the downside-skew zone → a higher implied vol is applied to that leg, making the DOout Put cheaper and improving the bank's margin.</p>
         </div>
+
       </div>
     </div>
 
-    <div class="c ac" style="padding:14px 18px">
-      <div class="flow">
-        <div class="fb" style="background:rgba(46,125,233,0.1);border-color:rgba(46,125,233,0.35)">
-          <div class="fl">Investor</div><div class="fn">Pays €1,000</div>
+    <!-- Cash flow diagram -->
+    <div class="c ac" style="padding:14px 20px">
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:stretch">
+
+        <!-- LEFT: two inputs -->
+        <div style="display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="font-size:9px;letter-spacing:2px;color:var(--gray);text-transform:uppercase;margin-bottom:2px">INVESTOR CONTRIBUTES</div>
+          <div style="background:rgba(46,125,233,0.1);border:1px solid rgba(91,164,245,0.3);border-radius:9px;padding:9px 12px">
+            <div style="font-size:11px;font-weight:700;color:#fff">€100 Notional</div>
+            <div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-top:2px">Capital paid at inception</div>
+          </div>
+          <div style="background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.3);border-radius:9px;padding:9px 12px">
+            <div style="font-size:11px;font-weight:700;color:#2dd4bf">≈ €15 Dividends (PV)</div>
+            <div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-top:2px">Foregone by investor (~3.3%/yr × 5Y). Bank retains them via its hedge position in SX5E.</div>
+          </div>
+          <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:7px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:9.5px;color:rgba(255,255,255,0.4)">Total bank budget</span>
+            <span style="font-size:13px;font-weight:900;color:#fff">≈ €115</span>
+          </div>
         </div>
-        <div class="farr"><span>→</span><span class="fal">notional</span></div>
-        <div class="fb">
-          <div class="fl">Issuing Bank</div><div class="fn">Structures Product</div>
+
+        <!-- CENTER: arrow -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 14px;gap:4px">
+          <div style="font-size:9px;color:var(--gray);text-align:center;margin-bottom:4px">DELTA1<br>CAPITAL</div>
+          <div style="font-size:18px;color:rgba(255,255,255,0.25)">→</div>
+          <div style="font-size:8px;color:var(--gray)">allocates</div>
         </div>
-        <div class="farr"><span>→</span><span class="fal">buys ZCB</span></div>
-        <div class="fb" style="background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.35)">
-          <div class="fl">Bond Market</div><div class="fn">~€853 invested</div>
+
+        <!-- RIGHT: three uses -->
+        <div style="display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="font-size:9px;letter-spacing:2px;color:var(--gray);text-transform:uppercase;margin-bottom:2px">BANK ALLOCATES</div>
+          <div style="background:rgba(37,99,235,0.1);border:1px solid rgba(91,164,245,0.3);border-radius:9px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--accent)">① Zero-Coupon Bond</div>
+              <div style="font-size:9.5px;color:rgba(255,255,255,0.5)">Capital guarantee leg</div>
+            </div>
+            <div style="font-size:13px;font-weight:900;color:var(--accent);white-space:nowrap">≈ €85</div>
+          </div>
+          <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.3);border-radius:9px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--gold)">② Options Overlay</div>
+              <div style="font-size:9.5px;color:rgba(255,255,255,0.5)">Long ATM Call + Long DOout ATM Put (H=65%)</div>
+            </div>
+            <div style="font-size:13px;font-weight:900;color:var(--gold);white-space:nowrap">≈ €14</div>
+          </div>
+          <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:7px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:9.5px;color:rgba(255,255,255,0.4)">Bank margin (before hedging costs)</span>
+            <span style="font-size:13px;font-weight:900;color:var(--green)">≈ €16</span>
+          </div>
         </div>
-        <div class="farr"><span>→</span><span class="fal">~€147 budget</span></div>
-        <div class="fb">
-          <div class="fl">Derivatives Desk</div><div class="fn">Straddle − OTM Put</div>
-        </div>
-        <div class="farr"><span>→</span><span class="fal">delta hedge</span></div>
-        <div class="fb" style="background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.3)">
-          <div class="fl">Market</div><div class="fn">SX5E Futures + Vol</div>
-        </div>
+
+      </div>
+      <div style="text-align:center;margin-top:10px;font-size:9.5px;color:rgba(255,255,255,0.3)">
+        At maturity: barrier intact → Twin Win absolute return &nbsp;|&nbsp; barrier breached (S_T &lt; 65%·S₀) → DOout Put knocked out, capital at risk
       </div>
     </div>
   </div>
@@ -991,7 +947,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="sh">How Is the Twin Win Priced? — Interactive Black-Scholes Model</div>
     <div class="div" style="margin-bottom:14px"></div>
 
-    <div id="pricer-layout" style="display:grid;grid-template-columns:285px 1fr;gap:16px;flex:1;min-height:0;overflow:hidden">
+    <div style="display:grid;grid-template-columns:285px 1fr;gap:16px;flex:1;min-height:0;overflow:hidden">
 
       <!-- ═══ LEFT — Parameter Panel ═══ -->
       <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:0;overflow-y:auto">
@@ -1015,7 +971,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
             <span style="background:rgba(91,164,245,0.18);border:1px solid rgba(91,164,245,0.35);color:var(--accent);font-size:12px;font-weight:800;padding:1px 8px;border-radius:8px;font-variant-numeric:tabular-nums" id="pr-q-val">3.3%</span>
           </div>
           <input class="pslider" id="pr-q" type="range" min="1" max="6" step="0.1" value="3.3">
-          <div style="font-size:9px;color:var(--gray);margin-top:3px;line-height:1.35">↑ Higher → lower forward price → Straddle cheaper</div>
+          <div style="font-size:9px;color:var(--gray);margin-top:3px;line-height:1.35">↑ Higher → bigger PV(Dividends) → more funding retained by bank → better margin</div>
         </div>
 
         <!-- σ -->
@@ -1025,7 +981,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
             <span style="background:rgba(91,164,245,0.18);border:1px solid rgba(91,164,245,0.35);color:var(--accent);font-size:12px;font-weight:800;padding:1px 8px;border-radius:8px;font-variant-numeric:tabular-nums" id="pr-sigma-val">18.0%</span>
           </div>
           <input class="pslider" id="pr-sigma" type="range" min="10" max="40" step="0.5" value="18">
-          <div style="font-size:9px;color:var(--gray);margin-top:3px;line-height:1.35">↑ Higher → Straddle more expensive → margin squeezed</div>
+          <div style="font-size:9px;color:var(--gray);margin-top:3px;line-height:1.35">↑ Higher → ATM Call &amp; DOout Put more expensive → margin squeezed</div>
         </div>
 
         <div style="font-size:8.5px;letter-spacing:2.5px;color:var(--gray);text-transform:uppercase;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,0.07)">📐 Product Terms</div>
@@ -1047,7 +1003,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
             <span style="background:rgba(91,164,245,0.18);border:1px solid rgba(91,164,245,0.35);color:var(--accent);font-size:12px;font-weight:800;padding:1px 8px;border-radius:8px;font-variant-numeric:tabular-nums" id="pr-B-val">65%</span>
           </div>
           <input class="pslider" id="pr-B" type="range" min="50" max="85" step="1" value="65">
-          <div style="font-size:9px;color:var(--gray);margin-top:3px;line-height:1.35">↑ Higher barrier → OTM Put cheaper → less margin but more breach risk</div>
+          <div style="font-size:9px;color:var(--gray);margin-top:3px;line-height:1.35">↑ Higher barrier → DOout Put knocks out more easily → cheaper → more margin but more breach risk</div>
         </div>
 
         <!-- Skew -->
@@ -1057,7 +1013,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
             <span style="background:rgba(91,164,245,0.18);border:1px solid rgba(91,164,245,0.35);color:var(--accent);font-size:12px;font-weight:800;padding:1px 8px;border-radius:8px;font-variant-numeric:tabular-nums" id="pr-sk-val">−3.0%</span>
           </div>
           <input class="pslider" id="pr-sk" type="range" min="-8" max="0" step="0.5" value="-3">
-          <div style="font-size:9px;color:var(--gray);margin-top:3px;line-height:1.35">↑ Steeper skew → OTM Put richer → more premium received</div>
+          <div style="font-size:9px;color:var(--gray);margin-top:3px;line-height:1.35">↑ Steeper skew → DI Put leg more expensive → DOout Put cheaper → better margin</div>
         </div>
 
         <!-- Reset -->
@@ -1074,7 +1030,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-shrink:0">
             <div>
               <div style="font-size:12.5px;font-weight:700;color:#fff">Cost Bridge — How is €100 structured?</div>
-              <div style="font-size:10px;color:rgba(255,255,255,0.38);margin-top:3px">Margin = €100 + Foregone Dividends − Zero-Coupon Bond − Straddle + OTM Put sold</div>
+              <div style="font-size:10px;color:rgba(255,255,255,0.38);margin-top:3px">Margin = €100 + Foregone Dividends − Zero-Coupon Bond − ATM Call − DOout ATM Put&nbsp;&nbsp;<span style="color:rgba(91,164,245,0.6)">(exact — Bouzoubaa 2010, p.175)</span></div>
             </div>
           </div>
           <div style="flex:1;min-height:0;position:relative">
@@ -1106,7 +1062,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
           <div style="background:rgba(220,53,69,0.07);border:1px solid rgba(220,53,69,0.2);border-radius:12px;padding:13px 15px;display:flex;flex-direction:column;justify-content:space-between">
             <div style="font-size:8px;letter-spacing:1.5px;color:var(--gray);text-transform:uppercase">Barrier Breach Prob.</div>
             <div style="font-size:26px;font-weight:900;color:var(--red);font-variant-numeric:tabular-nums;margin-top:6px" id="mt-bp">—</div>
-            <div style="font-size:9px;color:rgba(255,255,255,0.3);margin-top:3px">Q-measure probability of barrier hit</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);margin-top:3px">Risk-neutral probability (pricing measure, not historical)</div>
           </div>
 
         </div>
@@ -1124,84 +1080,158 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="sh">Bank Exposure &amp; Hedging Strategy</div>
     <div class="div"></div>
 
-    <div class="g2 mb">
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div class="c re ac">
-          <h3>What Is the Bank Exposed To?</h3>
-          <table style="margin-top:8px">
-            <tr><th>Risk</th><th>Direction</th><th>Explanation</th></tr>
-            <tr>
-              <td>Delta (spot risk)</td>
-              <td><span style="color:var(--accent)">≈ Neutral</span></td>
-              <td>The straddle is delta-neutral at inception. As spot moves, delta becomes non-zero and must be rebalanced continuously (dynamic hedging).</td>
-            </tr>
-            <tr>
-              <td>Gamma</td>
-              <td><span style="color:var(--green)">Long +</span></td>
-              <td>Being long a straddle makes the bank long gamma. Large spot moves (in either direction) generate mark-to-market gains for the bank — this is gamma scalping P&amp;L.</td>
-            </tr>
-            <tr>
-              <td>Vega (vol risk)</td>
-              <td><span style="color:var(--red)">Long +</span></td>
-              <td>The bank is long implied volatility via the straddle. If vol drops after issuance, the MTM value of the structure falls for the bank. Must be actively managed.</td>
-            </tr>
-            <tr>
-              <td>Theta (time decay)</td>
-              <td><span style="color:var(--red)">Short −</span></td>
-              <td>Long gamma and long vega positions naturally decay over time (theta is negative). The bank "pays" theta daily while waiting for vol/gamma P&amp;L to materialize.</td>
-            </tr>
-            <tr>
-              <td>Skew / Smile Risk</td>
-              <td><span style="color:var(--gold)">Short skew</span></td>
-              <td>Selling the 65%-strike put means the bank is exposed to skew: if the put's implied vol (relative to ATM) increases, the mark-to-market cost of the short put rises.</td>
-            </tr>
-            <tr>
-              <td>Dividend Risk</td>
-              <td><span style="color:var(--red)">Long div</span></td>
-              <td>The structure is funded by expected dividends. If SX5E companies cut dividends, the funding assumptions deteriorate, squeezing the bank's margin.</td>
-            </tr>
-          </table>
+    <!-- Framing: why hedging is not optional -->
+    <div style="background:linear-gradient(135deg,rgba(91,164,245,0.1),rgba(46,125,233,0.05));border:1px solid rgba(91,164,245,0.28);border-radius:11px;padding:12px 18px;margin-bottom:14px;display:flex;align-items:center;gap:14px">
+      <div style="font-size:22px;flex-shrink:0">💡</div>
+      <div style="font-size:11.5px;color:rgba(255,255,255,0.75);line-height:1.55">
+        <strong style="color:#fff">The pricing formula tells us what the product is <em>worth</em> — not how the bank <em>delivers</em> it.</strong> The bank does not actually buy the ATM Call and Down-and-Out Put from another dealer. It <strong style="color:var(--accent)">manufactures them synthetically</strong> by dynamically trading Euro Stoxx 50 futures over 5 years (Black-Scholes replication). Hedging is not additional work — it <em>is</em> how the bank earns the margin. Without it, the bank is simply gambling on the index level at maturity. The six cards below manage the imperfections of this replication (volatility changes, skew moves, dividend surprises, counterparty risk).
+      </div>
+    </div>
+
+    <!-- 6 risk/hedge cards — each pairs an exposure with its specific hedge -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+
+      <!-- 1. Delta / Gamma -->
+      <div style="background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:13px 15px;display:flex;flex-direction:column;gap:5px;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(91,164,245,0.45)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <span style="font-size:17px;font-weight:900;color:var(--accent);font-family:Georgia,serif;letter-spacing:1px">Δ · Γ</span>
+            <span style="font-size:12.5px;font-weight:800;color:#fff">Delta / Gamma</span>
+          </div>
+          <span style="background:rgba(34,197,94,0.13);border:1px solid rgba(34,197,94,0.3);color:var(--green);font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap">Long gamma</span>
+        </div>
+        <div style="font-size:9.5px;color:rgba(255,255,255,0.4);line-height:1.4;font-style:italic">Delta = sensitivity of the option price to the index. Gamma = sensitivity of delta itself.</div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,0.6);line-height:1.5;margin-top:3px">
+          <strong style="color:rgba(255,255,255,0.85)">Risk:</strong>&nbsp; Delta drifts when the index moves. Long gamma means delta <em>increases</em> as the index rises, <em>decreases</em> as it falls.
+        </div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,0.6);line-height:1.5">
+          <strong style="color:var(--accent)">Hedge:</strong>&nbsp; Daily rebalance using Euro Stoxx 50 futures. Forced "buy low / sell high" ⇒ <em>gamma scalping</em> profit if the market moves a lot.
         </div>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div class="c bl ac">
-          <h3>Hedging Strategy — The 5 Pillars</h3>
-          <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
-            <div>
-              <div style="font-size:12.5px;color:#fff;font-weight:700;margin-bottom:3px">1. Dynamic Delta Hedging</div>
-              <p style="font-size:12px">The trading desk buys and sells SX5E futures (or ETFs) continuously to maintain a delta-neutral book. As spot moves, the required hedge quantity changes — the bank rebalances, buying futures when the index falls and selling when it rises (gamma scalping).</p>
-            </div>
-            <div>
-              <div style="font-size:12.5px;color:#fff;font-weight:700;margin-bottom:3px">2. Vega Hedging</div>
-              <p style="font-size:12px">The bank uses variance swaps, volatility futures (VSTOXX), or vanilla options across tenors to hedge the vega exposure from the long straddle. Reducing vega sensitivity protects P&amp;L against sudden vol collapses.</p>
-            </div>
-            <div>
-              <div style="font-size:12.5px;color:#fff;font-weight:700;margin-bottom:3px">3. Skew Hedging</div>
-              <p style="font-size:12px">The short OTM put creates a negative skew exposure. The desk may purchase OTM put spreads to offset this, or use an OTM put ladder to neutralize the skew position at acceptable cost.</p>
-            </div>
-            <div>
-              <div style="font-size:12.5px;color:#fff;font-weight:700;margin-bottom:3px">4. Dividend Hedging</div>
-              <p style="font-size:12px">Forward dividend assumptions are locked in using SX5E dividend futures or a dividend swap, eliminating the risk that corporate dividend cuts reduce the product funding.</p>
-            </div>
-            <div>
-              <div style="font-size:12.5px;color:#fff;font-weight:700;margin-bottom:3px">5. CVA Management</div>
-              <p style="font-size:12px">The bank charges a CVA (Credit Valuation Adjustment) to the client to cover the risk that the bank itself defaults. This is embedded in the 1% structural margin.</p>
-            </div>
+      <!-- 2. Vega -->
+      <div style="background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:13px 15px;display:flex;flex-direction:column;gap:5px;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(91,164,245,0.45)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <span style="font-size:17px;font-weight:900;color:var(--accent);font-family:Georgia,serif;letter-spacing:1px">ν</span>
+            <span style="font-size:12.5px;font-weight:800;color:#fff">Vega</span>
           </div>
+          <span style="background:rgba(34,197,94,0.13);border:1px solid rgba(34,197,94,0.3);color:var(--green);font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap">Long vega</span>
         </div>
-        <div class="c go ac">
-          <h3>Bank P&amp;L Attribution (Expected)</h3>
-          <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
-            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:rgba(34,197,94,0.08);border-radius:8px;font-size:12.5px"><span>Structural margin (upfront)</span><span style="color:var(--green)">+1.0%</span></div>
-            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:rgba(34,197,94,0.08);border-radius:8px;font-size:12.5px"><span>Expected gamma scalping P&amp;L</span><span style="color:var(--green)">+0.4–0.6% p.a.</span></div>
-            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:rgba(239,68,68,0.08);border-radius:8px;font-size:12.5px"><span>Theta decay cost (long vol positions)</span><span style="color:var(--red)">−0.3–0.4% p.a.</span></div>
-            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:rgba(239,68,68,0.08);border-radius:8px;font-size:12.5px"><span>Transaction costs &amp; hedging slippage</span><span style="color:var(--red)">−0.15% p.a.</span></div>
-            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:rgba(239,68,68,0.08);border-radius:8px;font-size:12.5px"><span>CVA &amp; funding cost (XVA)</span><span style="color:var(--red)">−0.10% p.a.</span></div>
+        <div style="font-size:9.5px;color:rgba(255,255,255,0.4);line-height:1.4;font-style:italic">Vega = sensitivity of the option price to implied volatility.</div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,0.6);line-height:1.5;margin-top:3px">
+          <strong style="color:rgba(255,255,255,0.85)">Risk:</strong>&nbsp; The bank is long two options ⇒ long implied volatility. If vol drops after issuance, the options lose value on the books.
+        </div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,0.6);line-height:1.5">
+          <strong style="color:var(--accent)">Hedge:</strong>&nbsp; Variance swaps, VSTOXX futures (Euro Stoxx vol index), or vanilla options across maturities. Not hedged to zero — some vega retained.
+        </div>
+      </div>
+
+      <!-- 3. Theta -->
+      <div style="background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:13px 15px;display:flex;flex-direction:column;gap:5px;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(220,53,69,0.45)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <span style="font-size:17px;font-weight:900;color:var(--red);font-family:Georgia,serif;letter-spacing:1px">Θ</span>
+            <span style="font-size:12.5px;font-weight:800;color:#fff">Theta</span>
           </div>
+          <span style="background:rgba(220,53,69,0.13);border:1px solid rgba(220,53,69,0.3);color:var(--red);font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap">Short theta</span>
+        </div>
+        <div style="font-size:9.5px;color:rgba(255,255,255,0.4);line-height:1.4;font-style:italic">Theta = daily loss of option value simply due to time passing.</div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,0.6);line-height:1.5;margin-top:3px">
+          <strong style="color:rgba(255,255,255,0.85)">Risk:</strong>&nbsp; Long options decay daily — the daily "rent" the bank pays to keep the gamma position alive.
+        </div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,0.6);line-height:1.5">
+          <strong style="color:var(--accent)">Offset:</strong>&nbsp; Not hedged directly — covered by gamma scalping profits when the market actually realizes its implied volatility.
+        </div>
+      </div>
+
+      <!-- 4. Skew -->
+      <div style="background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:13px 15px;display:flex;flex-direction:column;gap:5px;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(201,168,76,0.45)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <span style="font-size:15px;line-height:1">📉</span>
+            <span style="font-size:12.5px;font-weight:800;color:#fff">Skew / Smile</span>
+          </div>
+          <span style="background:rgba(34,197,94,0.13);border:1px solid rgba(34,197,94,0.3);color:var(--green);font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap">Long skew</span>
+        </div>
+        <div style="font-size:9.5px;color:rgba(255,255,255,0.4);line-height:1.4;font-style:italic">Skew = different implied vols for different strikes (downside puts trade richer).</div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,0.6);line-height:1.5;margin-top:3px">
+          <strong style="color:rgba(255,255,255,0.85)">Risk:</strong>&nbsp; The Down-and-Out Put's value depends heavily on the 65%-strike implied vol (via its Down-and-In component).
+        </div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,0.6);line-height:1.5">
+          <strong style="color:var(--accent)">Hedge:</strong>&nbsp; Out-of-the-money put spreads or put ladders around the barrier. Steeper skew ⇒ cheaper DOout Put ⇒ better margin.
+        </div>
+      </div>
+
+      <!-- 5. Barrier -->
+      <div style="background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:13px 15px;display:flex;flex-direction:column;gap:5px;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(220,53,69,0.45)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <span style="font-size:15px;line-height:1">⚠️</span>
+            <span style="font-size:12.5px;font-weight:800;color:#fff">Barrier — Pin Risk</span>
+          </div>
+          <span style="background:rgba(220,53,69,0.13);border:1px solid rgba(220,53,69,0.3);color:var(--red);font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap">Short barrier</span>
+        </div>
+        <div style="font-size:9.5px;color:rgba(255,255,255,0.4);line-height:1.4;font-style:italic">Pin risk = wild swings in delta &amp; gamma when spot hovers near the knock-out level.</div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,0.6);line-height:1.5;margin-top:3px">
+          <strong style="color:rgba(255,255,255,0.85)">Risk:</strong>&nbsp; Near the 65% barrier, delta and gamma of the Down-and-Out Put jump discontinuously (knock-out risk).
+        </div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,0.6);line-height:1.5">
+          <strong style="color:var(--accent)">Hedge:</strong>&nbsp; <em>Barrier shift</em> — price as if the barrier were <em>closer</em> (e.g. 63% instead of 65%). A tighter barrier means a higher knock-out probability → the DOout Put is priced cheaper → the desk books a conservative cost. When hedging, the desk starts unwinding positions earlier than the contractual barrier (Bouzoubaa p.156).
+        </div>
+      </div>
+
+      <!-- 6. Dividends / XVA -->
+      <div style="background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:13px 15px;display:flex;flex-direction:column;gap:5px;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(20,184,166,0.45)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <span style="font-size:15px;line-height:1">💰</span>
+            <span style="font-size:12.5px;font-weight:800;color:#fff">Dividends &amp; Credit</span>
+          </div>
+          <span style="background:rgba(20,184,166,0.15);border:1px solid rgba(20,184,166,0.3);color:#2dd4bf;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap">Long dividends</span>
+        </div>
+        <div style="font-size:9.5px;color:rgba(255,255,255,0.4);line-height:1.4;font-style:italic">CVA (Credit Valuation Adjustment): cost of the bank's own default risk, charged to the client.</div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,0.6);line-height:1.5;margin-top:3px">
+          <strong style="color:rgba(255,255,255,0.85)">Risk:</strong>&nbsp; Funding depends on realized dividends; the bank's own credit standing affects fair value.
+        </div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,0.6);line-height:1.5">
+          <strong style="color:var(--accent)">Hedge:</strong>&nbsp; Euro Stoxx 50 dividend futures lock the funding. CVA &amp; funding costs are built into the margin upfront.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- P&L attribution — compact horizontal strip -->
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 18px">
+      <div style="font-size:9px;letter-spacing:2.5px;color:var(--gray);text-transform:uppercase;margin-bottom:10px">Expected P&amp;L Attribution — Annual</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr) auto;gap:8px;align-items:stretch">
+        <div style="background:rgba(34,197,94,0.08);border-left:3px solid var(--green);border-radius:6px;padding:8px 10px">
+          <div style="font-size:16px;font-weight:900;color:var(--green);font-variant-numeric:tabular-nums">+1.0%</div>
+          <div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-top:2px">Structural margin (upfront)</div>
+        </div>
+        <div style="background:rgba(34,197,94,0.08);border-left:3px solid var(--green);border-radius:6px;padding:8px 10px">
+          <div style="font-size:16px;font-weight:900;color:var(--green);font-variant-numeric:tabular-nums">+0.5%</div>
+          <div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-top:2px">Gamma scalping (expected)</div>
+        </div>
+        <div style="background:rgba(239,68,68,0.08);border-left:3px solid var(--red);border-radius:6px;padding:8px 10px">
+          <div style="font-size:16px;font-weight:900;color:var(--red);font-variant-numeric:tabular-nums">−0.35%</div>
+          <div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-top:2px">Theta decay (long vol)</div>
+        </div>
+        <div style="background:rgba(239,68,68,0.08);border-left:3px solid var(--red);border-radius:6px;padding:8px 10px">
+          <div style="font-size:16px;font-weight:900;color:var(--red);font-variant-numeric:tabular-nums">−0.15%</div>
+          <div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-top:2px">Transaction costs</div>
+        </div>
+        <div style="background:rgba(239,68,68,0.08);border-left:3px solid var(--red);border-radius:6px;padding:8px 10px">
+          <div style="font-size:16px;font-weight:900;color:var(--red);font-variant-numeric:tabular-nums">−0.10%</div>
+          <div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-top:2px">Credit &amp; funding charges</div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(91,164,245,0.15),rgba(46,125,233,0.08));border:1px solid rgba(91,164,245,0.35);border-radius:6px;padding:8px 14px;display:flex;flex-direction:column;justify-content:center">
+          <div style="font-size:9px;letter-spacing:1.5px;color:var(--gray);text-transform:uppercase">Net</div>
+          <div style="font-size:18px;font-weight:900;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap">≈ +0.9% p.a.</div>
         </div>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -1229,11 +1259,11 @@ tr:hover td{background:rgba(255,255,255,0.02)}
         <div style="font-size:26px;margin-bottom:8px">🏛️</div>
         <h3>For the Bank</h3>
         <ul class="bl" style="margin-top:8px">
-          <li>1% upfront structural margin</li>
-          <li>Long gamma → gamma scalping income</li>
-          <li>Hedge via futures, var swaps, div futures</li>
-          <li>Long vega exposure, manageable with vol overlay</li>
-          <li>CVA charged into margin</li>
+          <li>Exact replication: ZCB + Long ATM Call + Long DOout ATM Put</li>
+          <li>Long gamma → gamma scalping P&amp;L</li>
+          <li>Dynamic delta hedge via SX5E futures</li>
+          <li>Vega, skew &amp; barrier risks actively managed</li>
+          <li>Margin realized through disciplined hedging, not static pricing</li>
         </ul>
       </div>
       <div class="c gr ac">
@@ -1242,7 +1272,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
         <ul class="bl" style="margin-top:8px">
           <li>Deep, liquid options market (Eurex)</li>
           <li>~3.3% dividend yield funds the option overlay</li>
-          <li>Downside skew enriches short OTM put</li>
+          <li>Downside skew cheapens the DOout Put</li>
           <li>~15% historical 5Y barrier breach probability</li>
           <li>Familiar, PRIIPS-compliant, transparent</li>
         </ul>
@@ -1292,9 +1322,6 @@ for(let i=0;i<N;i++){const p=document.createElement('div');p.className='pip'+(i=
 
 function goTo(n){
   if(n===cur)return;
-  const leaving=cur;
-  // Mark destination slide as visited so .ac don't re-animate (sauf Pricing qui doit toujours réanimer)
-  setTimeout(()=>{ if(cur!==7) slides[cur].classList.add('visited'); }, 500);
   slides[cur].classList.remove('active');
   slides[cur].classList.add('prev');
   const prev=cur;
@@ -1302,29 +1329,12 @@ function goTo(n){
   slides[cur].classList.remove('prev');
   slides[cur].classList.add('active');
   setTimeout(()=>{slides[prev].classList.remove('prev')},500);
-  // Si on quitte la slide Pricing, reset ses .ac pour qu'ils réaniment au retour
-  if(leaving===7){
-    setTimeout(()=>{
-      slides[7].querySelectorAll('.ac').forEach(el=>{
-        el.style.animation='none';
-        void el.offsetWidth; // force reflow
-        el.style.animation='';
-        el.style.opacity='';
-        el.style.transform='';
-      });
-    }, 350);
-  }
   navItems.forEach((ni,i)=>ni.classList.toggle('active',i===cur));
   document.querySelectorAll('.pip').forEach((p,i)=>p.classList.toggle('on',i===cur));
   document.getElementById('counter').textContent=(cur+1)+' / '+N;
-  // Sync mobile nav
-  document.querySelectorAll('.mob-ni').forEach((ni,i)=>ni.classList.toggle('active',i===cur));
-  var mc=document.getElementById('mob-counter');if(mc)mc.textContent=(cur+1)+' / '+N;
   if(cur===2&&!chartInst)setTimeout(initChart,200);
   if(cur===7)setTimeout(initPricer,150);
 }
-// Mark first slide as visited on load so intro stats don't re-animate on return
-window.addEventListener('load',()=>{ setTimeout(()=>slides[0].classList.add('visited'),1200); });
 
 navItems.forEach(ni=>ni.addEventListener('click',()=>goTo(+ni.dataset.s)));
 document.addEventListener('keydown',e=>{
@@ -1570,7 +1580,7 @@ const scenarioInfo={
   breach:{
     icon:'⚠️',
     title:'Barrier Breach — European Barrier at −35%',
-    desc:'If the index closes BELOW −35% at maturity, the barrier is breached. The Twin Win and capital protection both disappear. The investor participates 1:1 in the index loss — exactly as if they held the index directly. Example: −45% index → −45% product return. Note: the barrier is only checked at final maturity (European), not daily.',
+    desc:'If the index closes BELOW −35% at maturity (European barrier — checked only at the final fixing), the Down-and-Out Put is knocked out. The mirror effect disappears entirely, and the investor participates 1:1 in the index loss — as if they held the index directly. Example: −45% index → −45% product return. The ZCB no longer provides protection once the barrier is breached.',
     pts:[
       {x:-45,y:-45,label:'−45% → −45%',color:'#ef4444'},
       {x:-55,y:-55,label:'−55% → −55%',color:'#ef4444'},
@@ -1692,11 +1702,13 @@ slides.forEach(s=>slideObs.observe(s,{attributes:true,attributeFilter:['class']}
 
 /* ═══════════════════ BLACK-SCHOLES PRICER ═══════════════════ */
 
-// Standard normal CDF — Abramowitz & Stegun approximation (error < 1.5e-7)
+// Standard normal CDF — via A&S 7.1.26 erf approximation, Φ(x) = 0.5*(1+erf(x/√2))
 function Φ(x){
   const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
-  const s=x<0?-1:1;const t=1/(1+p*Math.abs(x));
-  return 0.5*(1+s*(1-((((a5*t+a4)*t+a3)*t+a2)*t+a1)*t*Math.exp(-x*x)));
+  const s=x<0?-1:1;
+  const y=Math.abs(x)*Math.SQRT1_2; // |x|/√2 — scale to turn erf into normal CDF
+  const t=1/(1+p*y);
+  return 0.5*(1+s*(1-((((a5*t+a4)*t+a3)*t+a2)*t+a1)*t*Math.exp(-y*y)));
 }
 function bsCall(S,K,r,q,σ,T){
   if(T<=0)return Math.max(0,S*Math.exp(-q*T)-K*Math.exp(-r*T));
@@ -1709,6 +1721,28 @@ function bsPut(S,K,r,q,σ,T){
   const sq=σ*Math.sqrt(T);
   const d1=(Math.log(S/K)+(r-q+σ*σ/2)*T)/sq;
   return K*Math.exp(-r*T)*Φ(-(d1-sq))-S*Math.exp(-q*T)*Φ(-d1);
+}
+// Down-and-In Put (continuously monitored, H ≤ K) — Bouzoubaa (2010) p.175
+function bsDIPut(S,K,H,r,q,σ,T){
+  if(T<=0)return Math.max(0,K-S)*(S<=H?1:0);
+  if(S<=H)return bsPut(S,K,r,q,σ,T); // Already knocked in → behaves like vanilla put
+  const sq=σ*Math.sqrt(T), sq2=sq*sq;
+  const lam=(r-q+σ*σ/2)/(σ*σ);
+  const x1=(Math.log(S/H)+lam*sq2)/sq;
+  const y =(Math.log(H*H/(S*K))+lam*sq2)/sq;
+  const y1=(Math.log(H/S)+lam*sq2)/sq;
+  const a=Math.pow(H/S,2*lam);
+  const b=Math.pow(H/S,2*lam-2);
+  return -S*Math.exp(-q*T)*Φ(-x1)
+         +K*Math.exp(-r*T)*Φ(-x1+sq)
+         +S*Math.exp(-q*T)*a*(Φ(y)-Φ(y1))
+         -K*Math.exp(-r*T)*b*(Φ(y-sq)-Φ(y1-sq));
+}
+// Down-and-Out Put via parity: DOout = Vanilla Put − DI Put (Bouzoubaa p.175)
+function bsDOoutPut(S,K,H,r,q,σ,T,σ_dip){
+  // σ_dip: optional vol for DI Put leg (applies downside skew). Default = σ
+  const σD = (σ_dip===undefined)?σ:σ_dip;
+  return Math.max(0, bsPut(S,K,r,q,σ,T) - bsDIPut(S,K,H,r,q,σD,T));
 }
 // Risk-neutral probability that S_T < B*S_0 (breach probability under Q)
 function breachProb(B,r,q,σ,T){
@@ -1727,44 +1761,46 @@ function sliderFill(id,min,max,val){
 /* ═══════════════════ WATERFALL BRIDGE CHART ═══════════════════ */
 let waterfallChart=null;
 
-function buildWaterfall(zcb, straddle, put_otm, pvDiv, margin){
+function buildWaterfall(zcb, call, doout, pvDiv, margin){
   const canvas=document.getElementById('pr-waterfall');
   if(!canvas)return;
 
   // Running totals for floating bars [bottom, top]
+  // Total budget = €100 notional + PV(dividends retained via delta hedge)
+  // Uses: ZCB + ATM Call + DOout ATM Put. Remainder = Bank Margin.
   const budget=100+pvDiv;
   const afterZcb=budget-zcb;
-  const afterStr=afterZcb-straddle;
-  const afterPut=afterStr+put_otm; // = margin
+  const afterCall=afterZcb-call;
+  const afterDout=afterCall-doout; // = margin
 
   const mCol=margin>1.5?'rgba(34,197,94,0.85)':margin>0?'rgba(201,168,76,0.85)':'rgba(220,53,69,0.75)';
   const mBdr=margin>1.5?'rgba(34,197,94,1)':margin>0?'rgba(201,168,76,1)':'rgba(220,53,69,1)';
 
   const newData=[
-    [0,100],
-    [100,budget],
-    [afterZcb,budget],
-    [afterStr,afterZcb],
-    [afterStr,afterPut],
-    [0,margin]
+    [0,100],                  // Notional
+    [100,budget],             // Dividends (UP)
+    [afterZcb,budget],        // ZCB (DOWN)
+    [afterCall,afterZcb],     // ATM Call (DOWN)
+    [afterDout,afterCall],    // DOout Put (DOWN)
+    [0,margin]                // Margin
   ];
   const newBg=[
     'rgba(255,255,255,0.12)',
-    'rgba(20,184,166,0.75)',
-    'rgba(37,99,235,0.82)',
-    'rgba(201,168,76,0.82)',
-    'rgba(34,197,94,0.82)',
+    'rgba(20,184,166,0.75)',  // Dividends — teal
+    'rgba(37,99,235,0.82)',   // ZCB — blue
+    'rgba(201,168,76,0.82)',  // ATM Call — gold
+    'rgba(168,85,247,0.78)',  // DOout Put — violet (distinct from the other two option legs)
     mCol
   ];
-  const newBdr=['rgba(255,255,255,0.3)','rgba(20,184,166,1)','rgba(91,164,245,1)','rgba(201,168,76,1)','rgba(34,197,94,1)',mBdr];
+  const newBdr=['rgba(255,255,255,0.3)','rgba(20,184,166,1)','rgba(91,164,245,1)','rgba(201,168,76,1)','rgba(168,85,247,1)',mBdr];
 
   // Delta labels shown above each bar
   const deltas=[
     '+100€',
     '+'+pvDiv.toFixed(1)+'€',
     '−'+zcb.toFixed(1)+'€',
-    '−'+straddle.toFixed(1)+'€',
-    '+'+put_otm.toFixed(1)+'€',
+    '−'+call.toFixed(1)+'€',
+    '−'+doout.toFixed(1)+'€',
     (margin>=0?'+':'')+margin.toFixed(1)+'€'
   ];
 
@@ -1809,7 +1845,7 @@ function buildWaterfall(zcb, straddle, put_otm, pvDiv, margin){
   waterfallChart=new Chart(ctx2d,{
     type:'bar',
     data:{
-      labels:[['€100','Notional'],['Dividends','Funding'],['① Zero-Coupon','Bond cost'],['② At-the-Money','Straddle cost'],['③ OTM Put','Premium rec.'],['=','Margin']],
+      labels:[['€100','Notional'],['Dividends','Funding'],['① Zero-Coupon','Bond cost'],['② ATM','Call cost'],['③ DOout ATM','Put cost'],['=','Margin']],
       datasets:[{
         data:newData,
         backgroundColor:newBg,
@@ -1855,29 +1891,6 @@ function buildWaterfall(zcb, straddle, put_otm, pvDiv, margin){
   waterfallChart._wfDeltas=deltas;
 }
 
-/* ═══════════════════ SLIDE ENTRY ANIMATIONS ═══════════════════ */
-function animateSlide(idx){
-  if(idx===0)return; // Intro slide has its own particle animation
-  const slide=slides[idx];
-  if(!slide)return;
-  const targets=[...slide.querySelectorAll('.c,.mtile,.fm,.g2>div,.g4>div')];
-  if(!targets.length)return;
-  // Reset
-  targets.forEach(el=>{
-    el.style.opacity='0';
-    el.style.transform='translateY(20px)';
-    el.style.transition='none';
-  });
-  // Trigger after 2 frames so the reset is painted first
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    targets.forEach((el,i)=>{
-      const d=(0.04+i*0.09).toFixed(2)+'s';
-      el.style.transition=`opacity 0.5s ease ${d}, transform 0.5s ease ${d}`;
-      el.style.opacity='1';
-      el.style.transform='translateY(0)';
-    });
-  }));
-}
 
 let pricerInited=false;
 function updatePricer(){
@@ -1910,34 +1923,34 @@ function updatePricer(){
   // ① ZCB cost: PV of 100 at risk-free rate over T years
   const zcb=100*Math.exp(-r*T);
 
-  // ② ATM Straddle: long call + long put (K = S₀)
-  // Dividend yield q lowers the forward → options are cheaper
+  // ② ATM Call: long call (K = S₀)
   const call=bsCall(S,S,r,q,σ,T);
-  const put =bsPut (S,S,r,q,σ,T);
-  const straddle=call+put;
 
-  // ③ Short OTM Put (K = B·S₀): vol adjusted for skew
-  // Skew correction: puts at lower strikes trade at higher implied vol
-  // Simple linear skew: Δσ = |skew| × (moneyness gap / 25Δ reference)
+  // ③ ATM Down-and-Out Put (K = S₀, barrier H = B·S₀)
+  // Exact closed-form via parity: DOout Put = Vanilla Put − DI Put (Bouzoubaa p.175)
+  // Skew adjustment: barrier lives in downside skew region → use σ_dip > σ for DI Put leg.
   const moneynessGap=1-B; // e.g. 0.35 for B=0.65
+  // Skew correction for DI Put vol: linear approximation in log-moneyness.
+  // The 0.6 factor dampens the correction to avoid overshoot at high skews —
+  // empirical dampening used by desks; real models (SABR, SVI) would be more precise.
   const skewCorr=Math.abs(sk)*moneynessGap/0.25*0.6;
-  const σ_otm=Math.min(σ+skewCorr, σ*2.5); // cap at 2.5× ATM vol
-  const put_otm=bsPut(S,B*S,r,q,σ_otm,T);
+  const σ_dip=Math.min(σ+skewCorr, σ*2); // vol for DI Put leg (skew-adjusted, capped at 2×ATM)
+  const doout_put=bsDOoutPut(S,S,B*S,r,q,σ,T,σ_dip);
 
   // ④ PV of foregone dividends — retained by the bank from its delta hedge
   // The investor gives up dividends; the bank keeps them. This is the KEY funding source.
-  const pvDiv = S*(1-Math.exp(-q*T));
+  const pvDiv=S*(1-Math.exp(-q*T));
 
-  // Correct margin: bank receives €100 notional + pvDiv from dividends,
-  // then pays for ZCB and net options (Straddle − OTM Put premium received).
-  const margin = 100 + pvDiv - zcb - straddle + put_otm;
+  // Exact margin: bank receives €100 notional + pvDiv from dividends,
+  // then pays for ZCB + ATM Call + DOout ATM Put (exact structure).
+  const margin=100+pvDiv-zcb-call-doout_put;
 
   // Derived metrics
   const fwd=S*Math.exp((r-q)*T);
   const bProb=breachProb(B,r,q,σ,T);
 
   // ── Waterfall bridge chart ──
-  buildWaterfall(zcb, straddle, put_otm, pvDiv, margin);
+  buildWaterfall(zcb, call, doout_put, pvDiv, margin);
 
   // ── Margin indicator ──
   const mb =document.getElementById('pr-mbox');
@@ -1994,20 +2007,6 @@ function resetPricer(){
 }
 </script>
 <script>
-// ── Mobile nav ──
-function toggleMobNav(){
-  var btn=document.getElementById('mob-burger');
-  var nav=document.getElementById('mob-nav');
-  btn.classList.toggle('open');
-  nav.classList.toggle('open');
-}
-function mobGoTo(n){
-  goTo(n);
-  document.getElementById('mob-burger').classList.remove('open');
-  document.getElementById('mob-nav').classList.remove('open');
-}
-
-
 // ── QR Code auto-généré depuis l'URL de la page (fonctionnel une fois déployé) ──
 var _qrUrl = '';
 (function(){
@@ -2033,28 +2032,6 @@ function closeQrModal(){
   if(modal){ modal.classList.remove('open'); }
 }
 </script>
-
-<!-- ── Mobile hamburger button ── -->
-<button id="mob-burger" aria-label="Menu" onclick="toggleMobNav()">
-  <span></span><span></span><span></span>
-</button>
-
-<!-- ── Mobile nav overlay ── -->
-<div id="mob-nav">
-  <div class="mob-nav-title">Navigation</div>
-  <div class="mob-ni active" data-s="0" onclick="mobGoTo(0)"><span class="mob-nn">01</span><span class="mob-ico">🏛️</span><span class="mob-nl">Introduction</span></div>
-  <div class="mob-ni" data-s="1" onclick="mobGoTo(1)"><span class="mob-nn">02</span><span class="mob-ico">📋</span><span class="mob-nl">Product Overview</span></div>
-  <div class="mob-ni" data-s="2" onclick="mobGoTo(2)"><span class="mob-nn">03</span><span class="mob-ico">📈</span><span class="mob-nl">Payoff Analysis</span></div>
-  <div class="mob-ni" data-s="3" onclick="mobGoTo(3)"><span class="mob-nn">04</span><span class="mob-ico">👤</span><span class="mob-nl">Target Client</span></div>
-  <div class="mob-ni" data-s="4" onclick="mobGoTo(4)"><span class="mob-nn">05</span><span class="mob-ico">🌍</span><span class="mob-nl">Why Euro Stoxx 50</span></div>
-  <div class="mob-ni" data-s="5" onclick="mobGoTo(5)"><span class="mob-nn">06</span><span class="mob-ico">💼</span><span class="mob-nl">Client Pitch</span></div>
-  <div class="mob-ni" data-s="6" onclick="mobGoTo(6)"><span class="mob-nn">07</span><span class="mob-ico">⚙️</span><span class="mob-nl">Structuring</span></div>
-  <div class="mob-ni" data-s="7" onclick="mobGoTo(7)"><span class="mob-nn">08</span><span class="mob-ico">💰</span><span class="mob-nl">Pricing</span></div>
-  <div class="mob-ni" data-s="8" onclick="mobGoTo(8)"><span class="mob-nn">09</span><span class="mob-ico">🛡️</span><span class="mob-nl">Bank Hedging</span></div>
-  <div class="mob-ni" data-s="9" onclick="mobGoTo(9)"><span class="mob-nn">10</span><span class="mob-ico">📊</span><span class="mob-nl">Summary</span></div>
-  <div class="mob-counter" id="mob-counter">1 / 10</div>
-</div>
-
 
 <!-- QR Modal overlay -->
 <div id="qr-modal" onclick="closeQrModal()">
