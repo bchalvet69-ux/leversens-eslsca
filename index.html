@@ -260,11 +260,67 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 @media(max-width:780px){
   :root{--sw:0px}
   #sidebar{display:none}
-  .slide{padding:20px 18px 80px}
+  .slide{padding:20px 16px 80px}
   .intro-wrap{padding:32px 20px}
   .intro-ht{font-size:clamp(28px,8vw,48px)}
   .intro-stats{gap:16px}
   .intro-qr{display:none}
+
+  /* ── Grilles classes → colonne unique ── */
+  .g2,.g3,.g4{grid-template-columns:1fr !important}
+
+  /* ── Tous les grid inline → colonne unique ── */
+  #main [style*="grid-template-columns"]{
+    grid-template-columns:1fr !important;
+    overflow:visible !important;
+  }
+
+  /* ── Charts : hauteur lisible ── */
+  .chart-wrap{min-height:240px !important;max-height:280px !important}
+  #s3 .chart-wrap{min-height:220px !important;max-height:260px !important}
+
+  /* ── Slide S4 — hero persona : empiler les stats ── */
+  #s4 .ac:first-of-type > div:last-child{
+    flex-direction:column !important;
+    gap:6px !important;
+    flex-shrink:1 !important;
+  }
+  #s4 .ac:first-of-type{
+    flex-wrap:wrap !important;
+    gap:12px !important;
+  }
+
+  /* ── Slide S8 Pricing : layout vertical ── */
+  #s8 .inner{overflow-y:auto !important;padding-bottom:20px}
+  #pricer-layout{
+    display:flex !important;
+    flex-direction:column !important;
+    overflow:visible !important;
+    min-height:unset !important;
+    height:auto !important;
+  }
+  #s8 [style*="overflow:hidden"]{overflow:visible !important}
+
+  /* ── Pricer bottom metrics : 3 → 1 col ── */
+  #s8 [style*="1.7fr"]{
+    grid-template-columns:1fr !important;
+  }
+
+  /* ── Scenario box (s3) ── */
+  .se-box{font-size:12px !important}
+
+  /* ── Flow diagram (s7) : wrap ── */
+  .flow{flex-wrap:wrap !important;gap:8px !important;justify-content:flex-start !important}
+  .fnode{min-width:80px !important;font-size:10px !important}
+
+  /* ── Textes adaptés ── */
+  .sh{font-size:clamp(18px,4.5vw,26px) !important}
+  .c{padding:12px !important}
+  .mtile{padding:12px !important}
+
+  /* ── inner : ne pas bloquer le scroll ── */
+  .inner{overflow-y:auto !important;overflow-x:hidden}
+  .slide{overflow-y:auto !important}
 }
 
 /* ── Mobile hamburger button ── */
@@ -324,16 +380,8 @@ tr:hover td{background:rgba(255,255,255,0.02)}
   text-transform:uppercase;
 }
 /* Mobile swipe hint */
-#mob-swipe-hint{
-  display:none;position:fixed;bottom:18px;left:50%;
-  transform:translateX(-50%);z-index:200;
-  font-size:9px;font-weight:700;color:rgba(255,255,255,0.2);
-  letter-spacing:2px;text-transform:uppercase;
-  pointer-events:none;
-}
 @media(max-width:780px){
   #mob-burger{display:flex}
-  #mob-swipe-hint{display:block}
 }
 
 /* ── Logo animation ── */
@@ -943,7 +991,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="sh">How Is the Twin Win Priced? — Interactive Black-Scholes Model</div>
     <div class="div" style="margin-bottom:14px"></div>
 
-    <div style="display:grid;grid-template-columns:285px 1fr;gap:16px;flex:1;min-height:0;overflow:hidden">
+    <div id="pricer-layout" style="display:grid;grid-template-columns:285px 1fr;gap:16px;flex:1;min-height:0;overflow:hidden">
 
       <!-- ═══ LEFT — Parameter Panel ═══ -->
       <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:0;overflow-y:auto">
@@ -1959,19 +2007,6 @@ function mobGoTo(n){
   document.getElementById('mob-nav').classList.remove('open');
 }
 
-// ── Swipe tactile (mobile) ──
-(function(){
-  var tx=0,ty=0;
-  document.addEventListener('touchstart',function(e){tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
-  document.addEventListener('touchend',function(e){
-    var dx=e.changedTouches[0].clientX-tx;
-    var dy=e.changedTouches[0].clientY-ty;
-    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>50){
-      // Horizontal swipe — navigate
-      if(dx<0) goTo(cur+1); else goTo(cur-1);
-    }
-  },{passive:true});
-})();
 
 // ── QR Code auto-généré depuis l'URL de la page (fonctionnel une fois déployé) ──
 var _qrUrl = '';
@@ -2020,7 +2055,6 @@ function closeQrModal(){
   <div class="mob-counter" id="mob-counter">1 / 10</div>
 </div>
 
-<div id="mob-swipe-hint">← swipe →</div>
 
 <!-- QR Modal overlay -->
 <div id="qr-modal" onclick="closeQrModal()">
